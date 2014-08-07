@@ -25,24 +25,6 @@ function render_template(template_path, context) {
 }
 
 
-app.use("/static", express.static(__dirname + '/static'));
-
-app.get('/', function(req, res){
-    var template = swig.compileFile('templates/index.html');
-    var output = template({
-        project_name: 'Rendezvous',
-    });
-    res.send(output);
-});
-
-// views for generating the detail view
-app.get('/room/', function(req, res) {
-    // Returns a list of configured meeting rooms to select which room the
-    // client is representing
-    res.send(render_template('templates/rooms_list.html', {rooms: rooms}));
-})
-
-
 function Event(data) {
     this.title = data.summary;
     this.confirmed = data.confirmed;
@@ -62,6 +44,23 @@ Event.prototype.is_active = function() {
     return this.start.isBefore(now) && this.end.isAfter(now);
 }
 
+
+app.use("/static", express.static(__dirname + '/static'));
+
+app.get('/', function(req, res){
+    var template = swig.compileFile('templates/index.html');
+    var output = template({
+        project_name: 'Rendezvous',
+    });
+    res.send(output);
+});
+
+// views for generating the detail view
+app.get('/room/', function(req, res) {
+    // Returns a list of configured meeting rooms to select which room the
+    // client is representing
+    res.send(render_template('templates/rooms_list.html', {rooms: rooms}));
+})
 
 
 app.get('/room/:id/', function(req, res) {
