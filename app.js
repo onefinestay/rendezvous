@@ -148,6 +148,49 @@ app.get('/room/:id/', function(req, res) {
 });
 
 
+app.get('/room/:id/in-use', function(req, res) {
+    // gets the detail for the specified room
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.id];
+
+    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+        if(err) return res.send(500,err);
+
+        var current_event;
+        var schedule = [];
+
+        for (var i=0; i<data.items.length; i++) {
+            var ev;
+            try {
+                ev = new Event(data.items[i]);
+            } catch (e) {
+                // malformed data
+                console.log(e);
+            }
+
+            if (ev.confirmed !== true) {
+                schedule.push(ev);
+
+                if (ev.is_active()) {
+                    current_event = ev;
+                }
+            }
+        }
+
+        return res.send(render_template('templates/in-progress.html', {
+            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+            room: room,
+            room_name: data.summary,
+            current_event: current_event,
+            schedule: schedule
+        }));
+    });
+});
+
+
 passport.use(new GoogleStategy({
 	clientID: config.consumer_key,
 	clientSecret: config.consumer_secret,
