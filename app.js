@@ -106,9 +106,6 @@ app.get('/room/:id/', function(req, res) {
 });
 
 
-var port = Number(process.env.PORT || 3000)
-app.listen(port);
-
 passport.use(new GoogleStategy({
 	clientID: config.consumer_key,
 	clientSecret: config.consumer_secret,
@@ -255,3 +252,8 @@ app.all('/cal/:calendarId/:eventId', function(req, res){
     return res.send(data);
   });
 
+
+// server
+
+var port = Number(process.env.PORT || 3000)
+app.listen(port);
