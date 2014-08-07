@@ -16,4 +16,10 @@
     <p>{{ current_event.start.format('hh:mm') }}-{{ current_event.end.format('hh:mm') }}</p>
     <h3>Attendees</h3>
     <p>{% for attendee in current_event.attendees %}{{attendee.displayName}}, {% endfor %}</p>
+
+    <form action="." method="post">
+        <input type="text" name="meetingLength" />
+        <input type="submit" />
+    </form>
+
 {% endblock %}
