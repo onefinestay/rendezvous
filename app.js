@@ -50,6 +50,7 @@ function Event(data) {
     this.confirmed = data.confirmed;
     this.start = moment(data.start.dateTime);
     this.end = moment(data.end.dateTime);
+    this.minutes = this.end.diff(this.start, 'minutes');
     this.attendees = [];
 
     for (var i=0; i<data.attendees.length; i++) {
@@ -148,6 +149,15 @@ function schedule_for_room(data) {
     }
 }
 
+function calculate_schedule(schedule, anchor) {
+    var new_schedule = [];
+    for (var i=0; i<schedule.length; i++) {
+        var ev = schedule[i];
+        ev.from_start = ev.start.diff(from_start, 'minutes');
+        new_schedule.push(ev)
+    }
+}
+
 app.get('/room/:name/', function(req, res) {
     // gets the detail for the specified room
     if(!req.session.access_token) return res.redirect('/auth');
@@ -159,20 +169,21 @@ app.get('/room/:name/', function(req, res) {
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
 
-        room_data = schedule_for_room(data);
+        var now = moment()
+        var room_data = schedule_for_room(data);
+        var start_time = now.minutes(0).seconds(0).subtract('hours', 1);
 
-
-        var processed_schedule = [];
         for (var i=0; i<schedule.length; i++) {
             var item = schedule[i];
         }
 
         return res.send(render_template('templates/room_detail.html', {
-            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+            now: now.format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
             room_name: req.params.name,
+            start_time: start_time,
             current_event: room_data.current_event,
-            schedule: room_data.schedule
+            schedule: calculate_schedule(room_data.schedule, start_time)
         }));
     });
 });
@@ -254,7 +265,7 @@ app.get('/busyroom', function(req, res){
         room_name: "The Study",
         current: {
             title: 'very long boring title That Just Keeps Going On And On And Seriously Really Long',
-            description: 'Quick chat about something boring',      
+            description: 'Quick chat about something boring',
             start_time: '12:00',
             end_time: '15:00',
             owner: 'Fergus Doyle',
