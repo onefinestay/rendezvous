@@ -17,6 +17,27 @@
 /* #Site Styles
 ================================================== */
 
+header {
+	display: block;
+	height: 50px;
+	width: 100%;
+	background-color: #333;
+	color: #CCC;
+}
+
+header .date {
+	float: right;
+	display: block;
+	border: 10px 20px;
+	vertical-align: center;
+}
+
+header h1 {
+	color: #CCC;
+	font-size: 2em;
+	padding-left: 20px;
+}
+
 /* #Page Styles
 ================================================== */
 

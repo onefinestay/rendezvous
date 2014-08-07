@@ -1,13 +1,19 @@
-<html>
-<head>
-    <title>{{project_name}}</title>
-</head>
+{% extends 'layout.html' %}
 
-<body>
-    <h1>{{ project_name }} - {{ room.name }}</h1>
-    <h2>{{ current_status.event_title }}</h2>
-    <p>{{ current_status.start_time }}-{{ current_status.end_time }}</p>
+{% block title %}{{ room.name }}{% endblock %}
+
+{% block head %}
+    {% parent %}
+    <meta http-equiv="refresh" content="30; URL=/room/{{room.id}}/">
+{% endblock %}
+
+{% block content %}
+    <header>
+        <span class="date">{{now}}</span>
+        <h1>{{ room_name }}</h1>
+    </header>
+    <h1>{{ current_event.title }}</h1>
+    <p>{{ current_event.start.format('hh:mm') }}-{{ current_event.end.format('hh:mm') }}</p>
     <h3>Attendees</h3>
-    <p>{% for attendee in current_status.attendees %}{{attendee}}, {% endfor %}</p>
-</body>
-</html>
+    <p>{% for attendee in current_event.attendees %}{{attendee.displayName}}, {% endfor %}</p>
+{% endblock %}
