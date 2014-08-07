@@ -59,7 +59,6 @@ Event.prototype.is_active = function() {
     return this.start.isBefore(now) && this.end.isAfter(now);
 }
 
-
 app.use("/static", express.static(__dirname + '/static'));
 
 app.get('/', function(req, res){
@@ -148,6 +147,12 @@ app.get('/room/:name/', function(req, res) {
             }
         }
 
+
+        var processed_schedule = [];
+        for (var i=0; i<schedule.length; i++) {
+            var item = schedule[i];
+        }
+
         return res.send(render_template('templates/room_detail.html', {
             now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
@@ -200,15 +205,35 @@ app.get('/busyroom', function(req, res){
         start_hour: start_hour,
         schedule: [
             {
-                'length': 1,
                 'status': 'busy',
                 'title': 'event-0',
+                'minutes': 15,
             },
-            {'length': 2, 'status': 'free', 'title': 'event-1'},
-            {'length': 3, 'status': 'busy', 'title': 'event-2'},
-            {'length': 4, 'status': 'free', 'title': 'event-3'},
-            {'length': 5, 'status': 'busy', 'title': 'event-4'},
-            {'length': 5, 'status': 'free', 'title': 'event-5'}],
+            {
+                'status': 'free',
+                'title': 'event-1',
+                'minutes': 30,
+            },
+            {
+                'status': 'busy',
+                'title': 'event-2',
+                'minutes': 45,
+            },
+            {
+                'status': 'free',
+                'title': 'event-3',
+                'minutes': 60,
+            },
+            {
+                'status': 'busy',
+                'title': 'event-4',
+                'minutes': 80,
+            },
+            {
+                'status': 'free',
+                'title': 'event-5',
+                'minutes': 70,
+            }],
         project_name: 'Rendezvous',
     });
     res.send(output);
