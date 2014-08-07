@@ -75,14 +75,20 @@ app.get('/room/:id/', function(req, res) {
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
 
-        var ev;
         var current_event;
         var schedule = [];
+
+        console.log(data);
 
         console.log(schedule);
         for (var i=0; i<data.items.length; i++) {
             console.log('1');
-            ev = Event(data.items[i]);
+            try {
+                var ev = new Event(data.items[i]);
+            } catch (e) {
+                console.log(e);
+            }
+
             console.log('2');
             console.log(data.items.length);
             if (ev.confirmed !== true) {
@@ -91,6 +97,8 @@ app.get('/room/:id/', function(req, res) {
 
                 if (ev.is_active()) {
                     current_event = ev;
+                } else {
+                    console.log('4');
                 }
             }
         }
@@ -130,7 +138,7 @@ app.get('/auth/callback',
   function(req, res) {
     req.session.access_token = req.user.accessToken;
     req.session.gmail_address = req.user.emails[0]['value']
-    res.redirect('/cal');
+    res.redirect('/room/1/');
   });
 
 
