@@ -4,11 +4,11 @@
 
 {% block content %}
     <header>
-        <span class="date">Thu. 7th Aug, 2014</span>
-        <h1>{{ room.name }}</h1>
+        <span class="date">{{now}}</span>
+        <h1>{{ room_name }}</h1>
     </header>
-    <h1>{{ current_status.event_title }}</h1>
-    <p>{{ current_status.start_time }}-{{ current_status.end_time }}</p>
+    <h1>{{ current_event.event_title }}</h1>
+    <p>{{ current_event.start.format('hh:mm') }}-{{ current_event.end.format('hh:mm') }}</p>
     <h3>Attendees</h3>
-    <p>{% for attendee in current_status.attendees %}{{attendee}}, {% endfor %}</p>
+    <p>{% for attendee in current_event.attendees %}{{attendee.displayName}}, {% endfor %}</p>
 {% endblock %}

@@ -2,6 +2,7 @@ var express = require('express');
 var swig  = require('swig');
 var config = require('./config');
 var gcal = require('google-calendar');
+var moment = require('moment');
 
 var app = express();
 var passport = require('passport');
@@ -14,9 +15,9 @@ app.configure(function() {
 	app.use(passport.initialize());
 })
 
-var rooms = [  // TODO: autopopulate?
-    {id: 1, name: 'Boardroom'}
-];
+var rooms = {  // TODO: autopopulate?
+    1: {id: 1, cal_id: 'tintofs.com_43522d4e59432d31342d31322d4252@resource.calendar.google.com'}
+};
 
 
 function render_template(template_path, context) {
@@ -42,34 +43,69 @@ app.get('/room/', function(req, res) {
 })
 
 
+function Event(data) {
+    this.title = data.summary;
+    this.confirmed = data.confirmed;
+    this.start = moment(data.start.dateTime);
+    this.end = moment(data.end.dateTime);
+    this.attendees = [];
+
+    for (var i=0; i<data.attendees.length; i++) {
+        if (data.attendees[i].resource !== true) {
+            this.attendees.push(data.attendees[i]);
+        }
+    }
+}
+
+Event.prototype.is_active = function() {
+    var now = moment();
+    return this.start.isBefore(now) && this.end.isAfter(now);
+}
+
+
+
 app.get('/room/:id/', function(req, res) {
     // gets the detail for the specified room
-    res.send(render_template('templates/room_detail.html', {
-        room: rooms[0],
-        current_status: {
-            event_title: 'Board Meeting',
-            start_time: '12:00',
-            end_time: '15:00',
-            owner: 'Fergus Doyle',
-            attendees: ['Fergus Doyle', 'Shaun Stanworth', 'Matt Bennett']
-        },
-        schedule: [
-            {
-                event_title: 'Board Meeting',
-                start_time: '12:00',
-                end_time: '15:00',
-                owner: 'Fergus Doyle',
-                attendees: ['Fergus Doyle', 'Shaun Stanworth', 'Matt Bennett']
-            }, {
-                event_title: 'Drinks',
-                start_time: '18:00',
-                end_time: '20:00',
-                owner: 'Fergus Doyle',
-                attendees: ['Fergus Doyle', 'Shaun Stanworth', 'Matt Bennett', 'Luis Visintini']
-            },
-        ]
-    }));
-})
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.id];
+
+    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+        if(err) return res.send(500,err);
+
+        var ev;
+        var current_event;
+        var schedule = [];
+
+        console.log(schedule);
+        for (var i=0; i<data.items.length; i++) {
+            console.log('1');
+            ev = Event(data.items[i]);
+            console.log('2');
+            console.log(data.items.length);
+            if (ev.confirmed !== true) {
+                console.log('3');
+                schedule.push(ev);
+
+                if (ev.is_active()) {
+                    current_event = ev;
+                }
+            }
+        }
+
+        console.log(schedule);
+        console.log('shouldn\'t be undefined');
+
+        return res.send(render_template('templates/room_detail.html', {
+            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+            room_name: data.summary,
+            current_event: current_event,
+            schedule: schedule
+        }));
+    });
+});
 
 
 var port = Number(process.env.PORT || 3000)
@@ -91,9 +127,9 @@ app.get('/auth',
 
 app.get('/auth/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-  function(req, res) { 
+  function(req, res) {
     req.session.access_token = req.user.accessToken;
-    res.redirect('/cal');
+    res.redirect('/room/1/');
   });
 
 
@@ -104,9 +140,9 @@ app.get('/auth/callback',
 */
 
 app.all('/cal', function(req, res){
-  
+
   if(!req.session.access_token) return res.redirect('/auth');
-  
+
   //Create an instance from accessToken
   var accessToken = req.session.access_token;
 
@@ -117,38 +153,38 @@ app.all('/cal', function(req, res){
 });
 
 app.all('/cal/:calendarId', function(req, res){
-  
+
   if(!req.session.access_token) return res.redirect('/auth');
-  
+
   //Create an instance from accessToken
   var accessToken     = req.session.access_token;
   var calendarId      = req.params.calendarId;
-  
+
   gcal(accessToken).events.list(calendarId, {maxResults:1}, function(err, data) {
     if(err) return res.send(500,err);
-    
+
     console.log(data)
     if(data.nextPageToken){
       gcal(accessToken).events.list(calendarId, {maxResults:1, pageToken:data.nextPageToken}, function(err, data) {
         console.log(data.items)
       })
     }
-    
-    
+
+
     return res.send(data);
   });
 });
 
 
 app.all('/cal/:calendarId/:eventId', function(req, res){
-  
+
   if(!req.session.access_token) return res.redirect('/auth');
-  
+
   //Create an instance from accessToken
   var accessToken     = req.session.access_token;
   var calendarId      = req.params.calendarId;
   var eventId         = req.params.eventId;
-  
+
   gcal(accessToken).events.get(calendarId, eventId, function(err, data) {
     if(err) return res.send(500,err);
     return res.send(data);
