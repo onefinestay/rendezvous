@@ -15,20 +15,20 @@ app.configure(function() {
 })
 
 
-// app.get('/', function(req, res){
-//     var template = swig.compileFile('templates/index.html');
-//     var output = template({
-//         project_name: 'Rendezvous',
-//     });
-//     res.send(output);
-// });
+app.get('/', function(req, res){
+    var template = swig.compileFile('templates/index.html');
+    var output = template({
+        project_name: 'Rendezvous',
+    });
+    res.send(output);
+});
 
 app.listen(3000);
 
 passport.use(new GoogleStategy({
 	clientID: config.consumer_key,
 	clientSecret: config.consumer_secret,
-	callbackURL: "http://www.example.com:3000/auth/callback",
+	callbackURL: "http://lvh.me:3000/auth/callback",
 	scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar']
 },
 function (accessToken, refreshToken, profile, done) {
@@ -43,7 +43,7 @@ app.get('/auth/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
   function(req, res) { 
     req.session.access_token = req.user.accessToken;
-    res.redirect('/');
+    res.redirect('/cal');
   });
 
 
@@ -53,7 +53,7 @@ app.get('/auth/callback',
   ===========================================================================
 */
 
-app.all('/', function(req, res){
+app.all('/cal', function(req, res){
   
   if(!req.session.access_token) return res.redirect('/auth');
   
@@ -66,7 +66,7 @@ app.all('/', function(req, res){
   });
 });
 
-app.all('/:calendarId', function(req, res){
+app.all('/cal/:calendarId', function(req, res){
   
   if(!req.session.access_token) return res.redirect('/auth');
   
@@ -90,7 +90,7 @@ app.all('/:calendarId', function(req, res){
 });
 
 
-app.all('/:calendarId/:eventId', function(req, res){
+app.all('/cal/:calendarId/:eventId', function(req, res){
   
   if(!req.session.access_token) return res.redirect('/auth');
   
