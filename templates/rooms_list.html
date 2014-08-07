@@ -1,12 +1,12 @@
 {% extends 'layout.html' %}
 
-{% block title %}{{ project_name }} - Rooms{% endblock %}
+{% block title %}Rooms{% endblock %}
 
 {% block content %}
-    <h1>{{ project_name }} - Rooms</h1>
+    <h1>Rooms</h1>
 
     {% for room in rooms %}
-    <li>{{room.name}}</li>
+    <li><a href="/room/{{room.id}}">{{room.name}}</a></li>
     {% endfor %}
 {% endblock %}
 

@@ -1,10 +1,13 @@
 {% extends 'layout.html' %}
 
-{% block title %}{{ project_name }} - {{ room.name }}{% endblock %}
+{% block title %}{{ room.name }}{% endblock %}
 
 {% block content %}
-    <h1>{{ project_name }} - {{ room.name }}</h1>
-    <h2>{{ current_status.event_title }}</h2>
+    <header>
+        <span class="date">Thu. 7th Aug, 2014</span>
+        <h1>{{ room.name }}</h1>
+    </header>
+    <h1>{{ current_status.event_title }}</h1>
     <p>{{ current_status.start_time }}-{{ current_status.end_time }}</p>
     <h3>Attendees</h3>
     <p>{% for attendee in current_status.attendees %}{{attendee}}, {% endfor %}</p>
