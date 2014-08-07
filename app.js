@@ -97,6 +97,7 @@ app.get('/room/:id/', function(req, res) {
 
         return res.send(render_template('templates/room_detail.html', {
             now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+            room: room,
             room_name: data.summary,
             current_event: current_event,
             schedule: schedule
