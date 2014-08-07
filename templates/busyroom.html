@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+
+
+{% block content %}
+<div class="sixteen columns">
+    <div style="float: left">
+        <h2>Room Name</h2>
+    </div>
+    <div style="float: right">
+        <h2 id="clock">00:00</h2>
+    </div>
+</div>
+<div class="sixteen columns">
+    <div><span class="meeting-title">{{current.title}}</span> until {{current.end_time}}.</div>
+    <div class="attendees">
+        <strong>{{current.owner}}</strong>
+        {% if current.attendees %}
+           {{current.attendees|join(" ")}}
+        {% endif %}
+    </div>
+</div>
+
+<div class="sixteen columns">
+    {{current.description}}
+</div>
+
+<div class="sixteen columns">
+    <h4>Schedule</h4>
+    <div class="schedule-ct">
+        <div class="schedule-marker-ct">
+            {% for index in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]-%}
+                <!-- hour legend -->
+                {% if index % 4 == 0 %}
+                    <span style="left: {{index * 5 }}%" class="schedule-marker">
+                        {{start_hour + (index/4) }}:00
+                    </span>
+                {% endif %}
+
+                <!-- minor markers -->
+                <span style="left: {{index * 5 }}%" class="schedule-minor-marker"></span>
+
+            {%- endfor %}
+            <!-- current time marker -->
+            <span id="time-marker" style="left: 50%" class="current-time-marker"></span>
+
+        </div>
+
+        {% for item in schedule -%}
+            <div style="width: {{item.length * 5}}%;" class="schedule-item {{item.status}}">&nbsp;</div>
+        {%- endfor 
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript">
+
+    var updateTime = function() {
+        var time = new Date();
+        var hours = time.getHours();
+        var minutes = time.getMinutes();
+
+        var start_hour = {{start_hour}};
+        var passed_hours = hours - start_hour;
+        var passed_minutes = minutes + 60 * passed_hours;
+
+        var position_percent = (passed_minutes / (5 * 60)) * 100;
+
+        // update current time marker
+        document.getElementById("time-marker").style.left = position_percent + "%";
+
+        // update clock display
+        hours = ( hours < 10 ? "0" : "" ) + hours;
+        minutes = ( minutes < 10 ? "0" : "" ) + minutes;
+
+        var time_string = hours + ":" + minutes;
+        document.getElementById("clock").firstChild.nodeValue = time_string;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+</script>
+
+{% endblock %}
