@@ -116,6 +116,34 @@ app.post('/room/:id', function(req, res) {
 
 })
 
+function schedule_for_room(data) {
+    var current_event;
+    var schedule = [];
+
+    for (var i=0; i<data.items.length; i++) {
+        var ev;
+        try {
+            ev = new Event(data.items[i]);
+        } catch (e) {
+            // malformed data
+            console.log(e);
+        }
+
+        if (ev.confirmed !== true) {
+            schedule.push(ev);
+
+            if (ev.is_active()) {
+                current_event = ev;
+            }
+        }
+    }
+
+    return {
+        current_event: current_event,
+        schedule: schedule
+    }
+}
+
 app.get('/room/:name/', function(req, res) {
     // gets the detail for the specified room
     if(!req.session.access_token) return res.redirect('/auth');
@@ -127,33 +155,14 @@ app.get('/room/:name/', function(req, res) {
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
 
-        var current_event;
-        var schedule = [];
-
-        for (var i=0; i<data.items.length; i++) {
-            var ev;
-            try {
-                ev = new Event(data.items[i]);
-            } catch (e) {
-                // malformed data
-                console.log(e);
-            }
-
-            if (ev.confirmed !== true) {
-                schedule.push(ev);
-
-                if (ev.is_active()) {
-                    current_event = ev;
-                }
-            }
-        }
+        room_data = schedule_for_room(data);
 
         return res.send(render_template('templates/room_detail.html', {
             now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
-            room_name: data.summary,
-            current_event: current_event,
-            schedule: schedule
+            room_name: req.params.name,
+            current_event: room_data.current_event,
+            schedule: room_data.schedule
         }));
     });
 });
