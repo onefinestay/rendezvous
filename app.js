@@ -251,9 +251,10 @@ app.get('/busyroom', function(req, res){
 
     var template = swig.compileFile('templates/busyroom.html');
     var output = template({
+        room_name: "The Study",
         current: {
-            title: 'Board Meeting',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            title: 'very long boring title That Just Keeps Going On And On And Seriously Really Long',
+            description: 'Quick chat about something boring',      
             start_time: '12:00',
             end_time: '15:00',
             owner: 'Fergus Doyle',

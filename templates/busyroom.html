@@ -2,31 +2,38 @@
 
 
 {% block content %}
-<div class="sixteen columns">
+<div id="header" class="sixteen columns">
     <div style="float: left">
-        <h2>Room Name</h2>
+        <h4>{{room_name}}</h4>
     </div>
     <div style="float: right">
-        <h2 id="clock">00:00</h2>
+        <h4 id="clock">00:00</h4>
     </div>
 </div>
-<div class="sixteen columns">
-    <div><span class="meeting-title">{{current.title}}</span> until {{current.end_time}}.</div>
+
+<div id="status" class="sixteen columns">
+    <span class="status">Busy</span> until <span class="time">{{current.end_time}}</span>
+</div>
+
+<div id="detail" class="sixteen columns">
+    <div class="title">
+        {{current.title}}
+    </div>
     <div class="attendees">
-        <strong>{{current.owner}}</strong>
+        <span class="owner">{{current.owner}}</span>
         {% if current.attendees %}
            {{current.attendees|join(" ")}}
         {% endif %}
     </div>
+    <div class="description">
+        {{current.description}}
+    </div>
 </div>
 
-<div class="sixteen columns">
-    {{current.description}}
-</div>
+<!-- WHY?! -->
+&nbsp;
 
-{{test}}
-
-<div class="sixteen columns">
+<div id="schedule" class="sixteen columns">
     <h4>Schedule</h4>
     <div class="schedule-ct">
         <div class="schedule-marker-ct">
@@ -34,7 +41,7 @@
                 <!-- hour legend -->
                 {% if index % 4 == 0 %}
                     <span style="left: {{index * 5 }}%" class="schedule-marker">
-                        {{start_hour + (index/4) }}:00
+                        {{(start_hour + index/4) % 24 }}:00
                     </span>
                 {% endif %}
 
