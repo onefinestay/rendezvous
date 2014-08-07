@@ -124,7 +124,10 @@ app.all('/cal/:calendarId', function(req, res){
   var accessToken     = req.session.access_token;
   var calendarId      = req.params.calendarId;
   
-  gcal(accessToken).events.list(calendarId, {maxResults:1}, function(err, data) {
+  gcal(accessToken).events.list(calendarId, {
+  	maxResults:10,
+  	timeMin: new Date().toISOString()
+  }, function(err, data) {
     if(err) return res.send(500,err);
     
     console.log(data)
