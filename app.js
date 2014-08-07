@@ -11,6 +11,9 @@ function render_template(template_path, context) {
     return swig.compileFile(template_path)(context);
 }
 
+
+app.use("/static", express.static(__dirname + '/static'));
+
 app.get('/', function(req, res){
     var template = swig.compileFile('templates/index.html');
     var output = template({
