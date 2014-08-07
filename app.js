@@ -129,7 +129,8 @@ app.get('/auth/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
   function(req, res) {
     req.session.access_token = req.user.accessToken;
-    res.redirect('/room/1/');
+    req.session.gmail_address = req.user.emails[0]['value']
+    res.redirect('/cal');
   });
 
 
@@ -160,7 +161,10 @@ app.all('/cal/:calendarId', function(req, res){
   var accessToken     = req.session.access_token;
   var calendarId      = req.params.calendarId;
 
-  gcal(accessToken).events.list(calendarId, {maxResults:1}, function(err, data) {
+  gcal(accessToken).events.list(calendarId, {
+  	maxResults:10,
+  	timeMin: new Date().toISOString()
+  }, function(err, data) {
     if(err) return res.send(500,err);
 
     console.log(data)
@@ -173,6 +177,36 @@ app.all('/cal/:calendarId', function(req, res){
 
     return res.send(data);
   });
+});
+
+app.all('/cal/:calendarId/add', function(req, res) {
+	if(!req.session.access_token) return res.redirect('/auth');
+
+	//Create an instance from accessToken
+	var accessToken     = req.session.access_token;
+	var calendarId      = req.params.calendarId;
+
+    var event = {
+        'summary': 'Test03',
+        'start': {
+            'dateTime': '2014-08-07T17:00:00Z'
+        },
+        'end': {
+            'dateTime': '2014-08-07T17:05:00Z'
+        },
+        'attendees': [
+            {
+                'email': calendarId // the user from the URL
+            },
+            {
+                'email': req.session.gmail_address  // the logged in user
+            }
+        ]
+    };
+
+	gcal(accessToken).events.insert(calendarId, event, function(err, result) {
+        return res.send(result);
+    });
 });
 
 
