@@ -7,7 +7,7 @@
         <span class="date">{{now}}</span>
         <h1>{{ room_name }}</h1>
     </header>
-    <h1>{{ current_event.event_title }}</h1>
+    <h1>{{ current_event.title }}</h1>
     <p>{{ current_event.start.format('hh:mm') }}-{{ current_event.end.format('hh:mm') }}</p>
     <h3>Attendees</h3>
     <p>{% for attendee in current_event.attendees %}{{attendee.displayName}}, {% endfor %}</p>
