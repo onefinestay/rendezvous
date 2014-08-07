@@ -78,7 +78,7 @@ app.listen(port);
 passport.use(new GoogleStategy({
 	clientID: config.consumer_key,
 	clientSecret: config.consumer_secret,
-	callbackURL: "http://lvh.me:" + port + "/auth/callback",
+	callbackURL: (process.env.URL || ("http://lvh.me:" + port)) + "/auth/callback",
 	scope: ['openid', 'email', 'https://www.googleapis.com/auth/calendar']
 },
 function (accessToken, refreshToken, profile, done) {
