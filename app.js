@@ -3,10 +3,13 @@ var swig  = require('swig');
 var config = require('./config');
 var gcal = require('google-calendar');
 var moment = require('moment');
+var bodyParser = require('body-parser');
 
 var app = express();
 var passport = require('passport');
 var GoogleStategy = require('passport-google-oauth').OAuth2Strategy;
+
+app.use(bodyParser());
 
 app.configure(function() {
 	app.use(express.cookieParser());
@@ -63,6 +66,44 @@ Event.prototype.is_active = function() {
 }
 
 
+app.post('/room/:id', function(req, res) {
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    var meetingLength = req.body.meetingLength;
+    console.log('Meeting Length:' + meetingLength);
+
+	//Create an instance from accessToken
+	var accessToken     = req.session.access_token;
+
+    var room            = rooms[req.params.id];
+	var calendarId      = room.cal_id;
+
+    var event = {
+        'summary': 'Test03',
+        'start': {
+            'dateTime': moment().toISOString()
+        },
+        'end': {
+            'dateTime': moment().add(meetingLength, 'minutes')
+        },
+        'attendees': [
+            {
+                'email': calendarId // the user from the URL
+            },
+            {
+                'email': req.session.gmail_address  // the logged in user
+            }
+        ]
+    };
+
+	gcal(accessToken).events.insert(calendarId, event, function(err, result) {
+        console.log(err);
+        console.log(result);
+        return res.send('done');
+        return res.redirect('/room/' + req.params.id + '/');
+    });
+
+})
 
 app.get('/room/:id/', function(req, res) {
     // gets the detail for the specified room
