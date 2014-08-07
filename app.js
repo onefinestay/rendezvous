@@ -18,7 +18,18 @@ app.configure(function() {
 })
 
 var rooms = {  // TODO: autopopulate?
-    1: {id: 1, cal_id: 'tintofs.com_43522d4e59432d31342d31322d4252@resource.calendar.google.com'}
+    'boardroom': {
+        name: 'boardroom',
+        cal_id: 'tintofs.com_43522d4e59432d31342d31322d4252@resource.calendar.google.com'
+    },
+    'study': {
+        name: 'study',
+        cal_id: 'tintofs.com_2d3838353536353633313930@resource.calendar.google.com'
+    },
+    'drawingroom': {
+        name: 'drawingroom',
+        cal_id: 'tintofs.com_2d3938353839353535393236@resource.calendar.google.com'
+    },
 };
 
 
@@ -65,13 +76,13 @@ app.get('/room/', function(req, res) {
 })
 
 
-app.get('/room/:id/', function(req, res) {
+app.get('/room/:name/', function(req, res) {
     // gets the detail for the specified room
     if(!req.session.access_token) return res.redirect('/auth');
 
     //Create an instance from accessToken
     var accessToken     = req.session.access_token;
-    var room            = rooms[req.params.id];
+    var room            = rooms[req.params.name];
 
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
@@ -127,7 +138,7 @@ app.get('/auth/callback',
   function(req, res) {
     req.session.access_token = req.user.accessToken;
     req.session.gmail_address = req.user.emails[0]['value']
-    res.redirect('/room/1/');
+    res.redirect('/');
   });
 
 //demo page
