@@ -19,6 +19,11 @@ app.configure(function() {
 	app.use(passport.initialize());
 })
 
+// that and use Express's caching instead, if you like:
+app.set('view cache', false);
+// To disable Swig's cache, do the following:
+swig.setDefaults({ cache: false });
+
 var rooms = {  // TODO: autopopulate?
     'boardroom': {
         name: 'boardroom',
@@ -154,6 +159,49 @@ app.get('/room/:name/', function(req, res) {
         }
 
         return res.send(render_template('templates/room_detail.html', {
+            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+            room: room,
+            room_name: data.summary,
+            current_event: current_event,
+            schedule: schedule
+        }));
+    });
+});
+
+
+app.get('/room/:id/in-use', function(req, res) {
+    // gets the detail for the specified room
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.id];
+
+    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+        if(err) return res.send(500,err);
+
+        var current_event;
+        var schedule = [];
+
+        for (var i=0; i<data.items.length; i++) {
+            var ev;
+            try {
+                ev = new Event(data.items[i]);
+            } catch (e) {
+                // malformed data
+                console.log(e);
+            }
+
+            if (ev.confirmed !== true) {
+                schedule.push(ev);
+
+                if (ev.is_active()) {
+                    current_event = ev;
+                }
+            }
+        }
+
+        return res.send(render_template('templates/in-progress.html', {
             now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
             room_name: data.summary,
