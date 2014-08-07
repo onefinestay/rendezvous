@@ -78,8 +78,9 @@ app.get('/room/:id/', function(req, res) {
         var schedule = [];
 
         for (var i=0; i<data.items.length; i++) {
+            var ev;
             try {
-                var ev = new Event(data.items[i]);
+                ev = new Event(data.items[i]);
             } catch (e) {
                 // malformed data
                 console.log(e);
@@ -250,6 +251,7 @@ app.all('/cal/:calendarId/:eventId', function(req, res){
     if(err) return res.send(500,err);
     return res.send(data);
   });
+});
 
 
 // server
