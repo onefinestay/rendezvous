@@ -24,6 +24,8 @@
     {{current.description}}
 </div>
 
+{{test}}
+
 <div class="sixteen columns">
     <h4>Schedule</h4>
     <div class="schedule-ct">
@@ -42,12 +44,12 @@
             {%- endfor %}
             <!-- current time marker -->
             <span id="time-marker" style="left: 50%" class="current-time-marker"></span>
-
+        
         </div>
 
         {% for item in schedule -%}
-            <div style="width: {{item.length * 5}}%;" class="schedule-item {{item.status}}">&nbsp;</div>
-        {%- endfor 
+            <div style="width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}">&nbsp;</div>
+        {%- endfor %}
     </div>
 </div>
 

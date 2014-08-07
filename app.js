@@ -19,6 +19,11 @@ app.configure(function() {
 	app.use(passport.initialize());
 })
 
+// that and use Express's caching instead, if you like:
+app.set('view cache', false);
+// To disable Swig's cache, do the following:
+swig.setDefaults({ cache: false });
+
 var rooms = {  // TODO: autopopulate?
     'boardroom': {
         name: 'boardroom',
@@ -58,7 +63,6 @@ Event.prototype.is_active = function() {
     var now = moment();
     return this.start.isBefore(now) && this.end.isAfter(now);
 }
-
 
 app.use("/static", express.static(__dirname + '/static'));
 
@@ -157,12 +161,61 @@ app.get('/room/:name/', function(req, res) {
 
         room_data = schedule_for_room(data);
 
+
+        var processed_schedule = [];
+        for (var i=0; i<schedule.length; i++) {
+            var item = schedule[i];
+        }
+
         return res.send(render_template('templates/room_detail.html', {
             now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
             room_name: req.params.name,
             current_event: room_data.current_event,
             schedule: room_data.schedule
+        }));
+    });
+});
+
+
+app.get('/room/:id/in-use', function(req, res) {
+    // gets the detail for the specified room
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.id];
+
+    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+        if(err) return res.send(500,err);
+
+        var current_event;
+        var schedule = [];
+
+        for (var i=0; i<data.items.length; i++) {
+            var ev;
+            try {
+                ev = new Event(data.items[i]);
+            } catch (e) {
+                // malformed data
+                console.log(e);
+            }
+
+            if (ev.confirmed !== true) {
+                schedule.push(ev);
+
+                if (ev.is_active()) {
+                    current_event = ev;
+                }
+            }
+        }
+
+        return res.send(render_template('templates/in-progress.html', {
+            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+            room: room,
+            room_name: data.summary,
+            current_event: current_event,
+            schedule: schedule
         }));
     });
 });
@@ -209,15 +262,35 @@ app.get('/busyroom', function(req, res){
         start_hour: start_hour,
         schedule: [
             {
-                'length': 1,
                 'status': 'busy',
                 'title': 'event-0',
+                'minutes': 15,
             },
-            {'length': 2, 'status': 'free', 'title': 'event-1'},
-            {'length': 3, 'status': 'busy', 'title': 'event-2'},
-            {'length': 4, 'status': 'free', 'title': 'event-3'},
-            {'length': 5, 'status': 'busy', 'title': 'event-4'},
-            {'length': 5, 'status': 'free', 'title': 'event-5'}],
+            {
+                'status': 'free',
+                'title': 'event-1',
+                'minutes': 30,
+            },
+            {
+                'status': 'busy',
+                'title': 'event-2',
+                'minutes': 45,
+            },
+            {
+                'status': 'free',
+                'title': 'event-3',
+                'minutes': 60,
+            },
+            {
+                'status': 'busy',
+                'title': 'event-4',
+                'minutes': 80,
+            },
+            {
+                'status': 'free',
+                'title': 'event-5',
+                'minutes': 70,
+            }],
         project_name: 'Rendezvous',
     });
     res.send(output);

@@ -1,0 +1,96 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ room.name }}{% endblock %}
+
+{% block head %}
+{% parent %}
+<link rel="stylesheet" href="/static/stylesheets/flipclock.css">
+{% endblock %}
+
+{% block content %}
+<header>
+    <span class="date">{{now}}</span>
+
+    <h1>{{ room_name }}</h1>
+</header>
+
+<h1>{{ current_event.title }}</h1>
+
+
+<div class="row">
+    <div class="sixteen columns">
+        <div class="container row your-clock"></div>
+    </div>
+</div>
+
+<h2>Your meeting ends at {{ current_event.end.format('hh:mm A') }}</h2>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/static/js/flipclock.js"></script>
+<script src="/static/js/moment.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var currentDate = moment();
+
+        // Set some date in the future. In this case, it's always Jan 1
+        var futureDate = moment("{{ current_event.end.toISOString() }}");
+
+        // Calculate the difference in seconds between the future and current date
+        var diffSeconds = futureDate.diff(currentDate, 'seconds');
+
+        var clock;
+
+        clock = new FlipClock($('.your-clock'), diffSeconds, {
+            // ... your options here
+            countdown: true,
+            showSeconds: false
+        });
+
+        var countup = setInterval(function() {
+            var time = clock.getTime().time; // num of secs until event is over
+            
+            // TODO: decide based on actual value of time instead
+            var decider = time % 10;
+
+            if (decider < 2) {
+                $('body').addClass('impolite-warning')
+                $('body').removeClass('polite-warning');
+            } else if (decider < 4) {
+                $('body').addClass('polite-warning')
+                $('body').removeClass('impolite-warning');
+            } else {
+                $('body').removeClass('impolite-warning');
+                $('body').removeClass('polite-warning');
+            }
+
+            console.log(time);
+        }, 500);
+
+        console.log(clock);
+    });
+
+</script>
+
+<style>
+    .your-clock {
+        zoom: 1.9;
+        -moz-transform: scale(1.9)
+    }
+
+    .flip-clock-label {
+        display: none;
+    }
+
+    .impolite-warning {
+        background-color: red;
+    }
+
+    .polite-warning {
+        background-color: #ffffcc;
+    }
+
+</style>
+
+{% endblock %}
