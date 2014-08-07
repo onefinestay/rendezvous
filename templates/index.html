@@ -1,9 +1,7 @@
-<html>
-<head>
-    <title>{{project_name}}</title>
-</head>
+{% extends 'layout.html' %}
 
-<body>
-    <h1>{{project_name}}</h1>
-</body>
-</html>
+{% block title %}{{project_name}}{% endblock %}
+
+{% block content %}
+<h1>Welcome to {{project_name}}</h1>
+{% endblock %}
