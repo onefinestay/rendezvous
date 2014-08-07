@@ -52,6 +52,7 @@ function Event(data) {
     this.end = moment(data.end.dateTime);
     this.minutes = this.end.diff(this.start, 'minutes');
     this.attendees = [];
+    this.status = 'busy';
 
     for (var i=0; i<data.attendees.length; i++) {
         if (data.attendees[i].resource !== true) {
@@ -151,11 +152,15 @@ function schedule_for_room(data) {
 
 function calculate_schedule(schedule, anchor) {
     var new_schedule = [];
+    if (!schedule) return new_schedule;
+
     for (var i=0; i<schedule.length; i++) {
         var ev = schedule[i];
-        ev.from_start = ev.start.diff(from_start, 'minutes');
+        ev.from_start = ev.start.diff(anchor, 'minutes');
         new_schedule.push(ev)
     }
+
+    return new_schedule;
 }
 
 app.get('/room/:name/', function(req, res) {
@@ -171,13 +176,9 @@ app.get('/room/:name/', function(req, res) {
 
         var now = moment()
         var room_data = schedule_for_room(data);
-        var start_time = now.minutes(0).seconds(0).subtract('hours', 1);
+        var start_time = now.minutes(0).seconds(0).subtract(1, 'hours');
 
-        for (var i=0; i<schedule.length; i++) {
-            var item = schedule[i];
-        }
-
-        return res.send(render_template('templates/room_detail.html', {
+        return res.send(render_template('templates/busyroom.html', {
             now: now.format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
             room_name: req.params.name,

@@ -12,22 +12,22 @@
 </div>
 
 <div id="status" class="sixteen columns">
-    <span class="status">Busy</span> until <span class="time">{{current.end_time}}</span>
+    <span class="status">Busy</span> until <span class="time">{{current_event.end.format('hh:mm')}}</span>
 </div>
 
 <div id="detail" class="sixteen columns">
     <div class="title">
-        {{current.title}}
+        {{current_event.title}}
     </div>
     <div class="attendees">
-        <span class="owner">{{current.owner}}</span>
-        {% if current.attendees %}
-           {{current.attendees|join(" ")}}
+        <!-- span class="owner">{{current_event.owner}}</span -->
+        {% if current_event.attendees %}
+           {{current_event.attendees|join(" ")}}
         {% endif %}
     </div>
-    <div class="description">
-        {{current.description}}
-    </div>
+    <!--div class="description">
+        {{current_event.description}}
+    </div-->
 </div>
 
 <!-- WHY?! -->
@@ -41,7 +41,7 @@
                 <!-- hour legend -->
                 {% if index % 4 == 0 %}
                     <span style="left: {{index * 5 }}%" class="schedule-marker">
-                        {{(start_hour + index/4) % 24 }}:00
+                        {{(start_time.hour() + index/4) % 24 }}:00
                     </span>
                 {% endif %}
 
@@ -51,11 +51,11 @@
             {%- endfor %}
             <!-- current time marker -->
             <span id="time-marker" style="left: 50%" class="current-time-marker"></span>
-        
+
         </div>
 
         {% for item in schedule -%}
-            <div style="width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}">&nbsp;</div>
+            <div style="width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;</div>
         {%- endfor %}
     </div>
 </div>
@@ -71,7 +71,7 @@
         var hours = time.getHours();
         var minutes = time.getMinutes();
 
-        var start_hour = {{start_hour}};
+        var start_hour = {{start_time.hour()}};
         var passed_hours = hours - start_hour;
         var passed_minutes = minutes + 60 * passed_hours;
 
