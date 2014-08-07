@@ -19,6 +19,11 @@ app.configure(function() {
 	app.use(passport.initialize());
 })
 
+// that and use Express's caching instead, if you like:
+app.set('view cache', false);
+// To disable Swig's cache, do the following:
+swig.setDefaults({ cache: false });
+
 var rooms = {  // TODO: autopopulate?
     'boardroom': {
         name: 'boardroom',
