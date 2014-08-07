@@ -8,6 +8,8 @@ var app = express();
 var passport = require('passport');
 var GoogleStategy = require('passport-google-oauth').OAuth2Strategy;
 
+var port = Number(process.env.PORT || 3000)
+
 app.configure(function() {
 	app.use(express.cookieParser());
 	app.use(express.bodyParser());
@@ -256,5 +258,4 @@ app.all('/cal/:calendarId/:eventId', function(req, res){
 
 // server
 
-var port = Number(process.env.PORT || 3000)
 app.listen(port);
