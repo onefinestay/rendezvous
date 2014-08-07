@@ -1,13 +1,11 @@
-<html>
-<head>
-    <title>{{project_name}}</title>
-</head>
+{% extends 'layout.html' %}
 
-<body>
+{% block title %}{{ project_name }} - {{ room.name }}{% endblock %}
+
+{% block content %}
     <h1>{{ project_name }} - {{ room.name }}</h1>
     <h2>{{ current_status.event_title }}</h2>
     <p>{{ current_status.start_time }}-{{ current_status.end_time }}</p>
     <h3>Attendees</h3>
     <p>{% for attendee in current_status.attendees %}{{attendee}}, {% endfor %}</p>
-</body>
-</html>
+{% endblock %}
