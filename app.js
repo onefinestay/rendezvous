@@ -78,33 +78,22 @@ app.get('/room/:id/', function(req, res) {
         var current_event;
         var schedule = [];
 
-        console.log(data);
-
-        console.log(schedule);
         for (var i=0; i<data.items.length; i++) {
-            console.log('1');
             try {
                 var ev = new Event(data.items[i]);
             } catch (e) {
+                // malformed data
                 console.log(e);
             }
 
-            console.log('2');
-            console.log(data.items.length);
             if (ev.confirmed !== true) {
-                console.log('3');
                 schedule.push(ev);
 
                 if (ev.is_active()) {
                     current_event = ev;
-                } else {
-                    console.log('4');
                 }
             }
         }
-
-        console.log(schedule);
-        console.log('shouldn\'t be undefined');
 
         return res.send(render_template('templates/room_detail.html', {
             now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
