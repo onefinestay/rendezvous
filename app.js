@@ -29,15 +29,21 @@ var GMT = "Europe/London";
 
 var rooms = {  // TODO: autopopulate?
     'boardroom': {
-        name: 'boardroom',
+        id: 'boardroom',
+        name: 'The Boardroom',
+        location: '300 SJS',
         cal_id: 'tintofs.com_43522d4e59432d31342d31322d4252@resource.calendar.google.com'
     },
     'study': {
-        name: 'study',
+        id: 'study',
+        name: 'The Study',
+        location: '300 SJS',
         cal_id: 'tintofs.com_2d3838353536353633313930@resource.calendar.google.com'
     },
     'drawingroom': {
-        name: 'drawingroom',
+        id: 'drawingroom',
+        name: 'The Drawing Room',
+        location: '300 SJS',
         cal_id: 'tintofs.com_2d3938353839353535393236@resource.calendar.google.com'
     },
 };
@@ -49,6 +55,7 @@ function render_template(template_path, context) {
 
 
 function Event(data) {
+    
     this.title = data.summary;
     this.confirmed = data.confirmed;
     this.start = moment.utc(data.start.dateTime).tz(GMT);
@@ -58,8 +65,13 @@ function Event(data) {
     this.status = 'busy';
 
     for (var i=0; i<data.attendees.length; i++) {
-        if (data.attendees[i].resource !== true) {
-            this.attendees.push(data.attendees[i]);
+        attendee =  data.attendees[i]
+        if (attendee.resource !== true) {
+            if (attendee.organizer == true) {
+                this.owner = attendee.displayName;
+            } else {
+                this.attendees.push(attendee.displayName);
+            }
         }
     }
 }
@@ -206,7 +218,6 @@ app.get('/room/:name/', function(req, res) {
 
         return res.send(render_template('templates/busyroom.html', {
             room: room,
-            room_name: req.params.name,
             start_time: start_time,
             current_event: room_data.current_event,
             next_event: room_data.next_event,
@@ -338,6 +349,58 @@ app.get('/room/:id/in-use', function(req, res) {
 });
 
 
+app.post('/room/:id/in-use', function(req, res) {
+    req.session.lastUrl = req.originalUrl;
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.id];
+
+    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+        if(err) return res.send(500,err);
+
+        var current_event;
+        var g_event;
+        var schedule = [];
+
+        for (var i=0; i<data.items.length; i++) {
+            var ev;
+            try {
+                g_event = data.items[i];
+                ev = new Event(data.items[i]);
+            } catch (e) {
+                // malformed data
+                console.log(e);
+            }
+
+            if (ev.confirmed !== true) {
+                schedule.push(ev);
+
+                if (ev.is_active()) {
+                    current_event = ev;
+                    break;
+                }
+            }
+        }
+
+        if (current_event === undefined) {
+            throw new Error();
+        }
+
+        var event_id = g_event['id'];
+        g_event['end']['dateTime'] = moment().toISOString();
+
+        gcal(accessToken).events.update(room.cal_id, event_id, g_event, function(err, result) {
+            return res.send({
+                // TODO get the actual next meeting label
+                next_meeting_label: "Company Meeting 2014"
+            });
+        });
+    });
+});
+
+
 passport.use(new GoogleStategy({
 	clientID: config.consumer_key,
 	clientSecret: config.consumer_secret,
@@ -365,100 +428,6 @@ app.get('/auth/success', function(request, response) {
   response.redirect(request.session.lastUrl || '/');
 });
 
-
-/*
-  ===========================================================================
-                               Google Calendar
-  ===========================================================================
-*/
-
-app.all('/cal', function(req, res){
-  req.session.lastUrl = req.originalUrl;
-  if(!req.session.access_token) return res.redirect('/auth');
-
-  //Create an instance from accessToken
-  var accessToken = req.session.access_token;
-
-  gcal(accessToken).calendarList.list(function(err, data) {
-    if(err) return res.send(500,err);
-    return res.send(data);
-  });
-});
-
-app.all('/cal/:calendarId', function(req, res){
-  req.session.lastUrl = req.originalUrl;
-  if(!req.session.access_token) return res.redirect('/auth');
-
-  //Create an instance from accessToken
-  var accessToken     = req.session.access_token;
-  var calendarId      = req.params.calendarId;
-
-  gcal(accessToken).events.list(calendarId, {
-  	maxResults:10,
-  	timeMin: new Date().toISOString()
-  }, function(err, data) {
-    if(err) return res.send(500,err);
-
-    console.log(data)
-    if(data.nextPageToken){
-      gcal(accessToken).events.list(calendarId, {maxResults:1, pageToken:data.nextPageToken}, function(err, data) {
-        console.log(data.items)
-      })
-    }
-
-
-    return res.send(data);
-  });
-});
-
-app.all('/cal/:calendarId/add', function(req, res) {
-    req.session.lastUrl = req.originalUrl;
-	if(!req.session.access_token) return res.redirect('/auth');
-
-	//Create an instance from accessToken
-	var accessToken     = req.session.access_token;
-	var calendarId      = req.params.calendarId;
-
-    var event = {
-        'summary': 'Test03',
-        'start': {
-            'dateTime': '2014-08-07T17:00:00Z'
-        },
-        'end': {
-            'dateTime': '2014-08-07T17:05:00Z'
-        },
-        'attendees': [
-            {
-                'email': calendarId // the user from the URL
-            },
-            {
-                'email': req.session.gmail_address  // the logged in user
-            }
-        ]
-    };
-
-	gcal(accessToken).events.insert(calendarId, event, function(err, result) {
-        return res.send(result);
-    });
-});
-
-
-app.all('/cal/:calendarId/:eventId', function(req, res){
-  req.session.lastUrl = req.originalUrl;
-  if(!req.session.access_token) return res.redirect('/auth');
-
-  //Create an instance from accessToken
-  var accessToken     = req.session.access_token;
-  var calendarId      = req.params.calendarId;
-  var eventId         = req.params.eventId;
-
-  gcal(accessToken).events.get(calendarId, eventId, function(err, data) {
-    if(err) return res.send(500,err);
-    return res.send(data);
-  });
-});
-
-
-// server
+require('./cal_api')(app, gcal);
 
 app.listen(port);

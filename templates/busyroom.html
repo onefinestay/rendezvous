@@ -2,84 +2,97 @@
 
 {% block head %}
     {% parent %}
-    <meta http-equiv="refresh" content="60; URL=/room/{{room.name}}/">
+    <meta http-equiv="refresh" content="60; URL=/room/{{room.id}}/">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
 {% endblock %}
 
 {% block content %}
 <div id="header" class="row">
-    <div style="float: left">
-        <h4>{{room_name}}</h4>
-    </div>
-    <div style="float: right">
-        <h4 id="clock">00:00</h4>
+    <div class="sixteen columns">
+        <div class="section">
+            <div class="room">
+                <h4>{{room.location}} // {{room.name}}</h4>
+            </div>
+            <div class="time">
+                <h4 id="clock">00:00</h4>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="status" class="row">
-    {% if current_event %}
-        <span class="status">Busy</span>
-        until
-        <span class="time">{{current_event.end.format('HH:mm')}}</span>
-    {% else %}
-        <span class="status">Available</span>
-        {% if next_event %}
-            until
-            <span class="time">{{next_event.start.format('HH:mm')}}</span>
-        {% endif %}
-    {% endif %}
-</div>
-
-<div id"main" class="row">
-
-    <div id="detail" class="fourteen columns alpha">
-        {% if current_event %}
-        <div class="title">
-            {{current_event.title}}
-        </div>
-        <div class="attendees">
-            {% if current_event.attendees %}
-               {{current_event.attendees|join(" ")}}
+    <div class="sixteen columns">
+        <div class="section">
+            {% if current_event %}
+                <span class="status">Busy</span>
+                until
+                <span class="time">{{current_event.end.format('HH:mm')}}</span>
+            {% else %}
+                <span class="status">Available</span>
+                {% if next_event %}
+                    until
+                    <span class="time">{{next_event.start.format('HH:mm')}}</span>
+                {% endif %}
             {% endif %}
         </div>
-        {% else %}
-            {% for time in adhoc_times %}
-                <a class="book-button three columns" href="/room/{{room.name}}/book/{{time.toISOString()}}">Book until {{time.format('hh:mm')}}</a>
-            {% endfor %}
-        {% endif %}
     </div>
-
-    <div id="free-rooms" class="two columns omega">
-        <h4>Currently free:</h4>
-        <p id="free-rooms-list"></p>
-    </div>
-
 </div>
+
+<div id="detail" class="row">
+    <div class="sixteen columns">
+        <div class="section">
+            {% if current_event %}
+            <div class="title">
+                {{current_event.title}}
+            </div>
+            <div class="attendees">
+                <span>Attendees:</span>
+                <span class="owner">{{current_event.owner}}</span>
+                {% if current_event.attendees %}
+                   {{current_event.attendees|join(" ")}}
+                {% endif %}
+            </div>
+
+            {% else %}
+                {% for time in adhoc_times %}
+                    <a class="book-button three columns" href="/room/{{room.name}}/book/{{time.toISOString()}}">Book until {{time.format('hh:mm')}}</a>
+                {% endfor %}
+            {% endif %}
+            {% if current_event %}
+            <h4>Alternative Rooms</h4>
+            <p id="free-rooms-list"></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
 
 <div id="schedule" class="row">
     <div class="sixteen columns">
-        <h4>Schedule</h4>
-        <div class="schedule-ct">
-            <div class="schedule-marker-ct">
-                {% for index in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]-%}
-                    <!-- hour legend -->
-                    {% if index % 4 == 0 %}
-                        <span style="left: {{index * 5 }}%" class="schedule-marker">
-                            {{(start_time.hour() + index/4) % 24 }}:00
-                        </span>
-                    {% endif %}
+        <div class="section">
+            <h4>Schedule</h4>
+            <div class="schedule-ct">
+                <div class="schedule-marker-ct">
+                    {% for index in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]-%}
+                        <!-- hour legend -->
+                        {% if index % 4 == 0 %}
+                            <span style="left: {{index * 5 }}%" class="schedule-marker">
+                                {{(start_time.hour() + index/4) % 24 }}:00
+                            </span>
+                        {% endif %}
 
-                    <!-- minor markers -->
-                    <span style="left: {{index * 5 }}%" class="schedule-minor-marker"></span>
+                        <!-- minor markers -->
+                        <span style="left: {{index * 5 }}%" class="schedule-minor-marker"></span>
 
+                    {%- endfor %}
+                    <!-- current time marker -->
+                    <span id="time-marker" style="left: 50%" class="current-time-marker"></span>
+
+                {% for item in schedule -%}
+                    <div style="left: {{item.from_start / 3}}%; width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;</div>
                 {%- endfor %}
-                <!-- current time marker -->
-                <span id="time-marker" style="left: 50%" class="current-time-marker"></span>
-
-            {% for item in schedule -%}
-                <div style="left: {{item.from_start / 3}}%; width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;</div>
-            {%- endfor %}
+                </div>
             </div>
         </div>
     </div>
