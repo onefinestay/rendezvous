@@ -38,7 +38,9 @@
         </div>
     </div>
 
-    <a class="book-button four columns" href="#" data-bind="click: finishMeeting">I'm Done</a>
+    <a id="finish-meeting" class="book-button three columns" href="#" height=170 data-bind="click: finishMeeting" style="float: right">
+        <img src="/static/images/bin.svg" width=80 style="margin-left:35px; margin-top: 30px;">
+    </a>
 
     <h2 class="sixteen columns" id="meeting_end_label">
         Your meeting ends at <span data-bind="text: currentEventEndTimeLabel"></span>
