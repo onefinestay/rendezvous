@@ -156,6 +156,7 @@ function calculate_schedule(schedule, anchor) {
 
     for (var i=0; i<schedule.length; i++) {
         var ev = schedule[i];
+        console.log(ev.start.toISOString(), anchor.toISOString())
         ev.from_start = ev.start.diff(anchor, 'minutes');
         new_schedule.push(ev)
     }
@@ -176,7 +177,7 @@ app.get('/room/:name/', function(req, res) {
 
         var now = moment()
         var room_data = schedule_for_room(data);
-        var start_time = now.minutes(0).seconds(0).subtract(1, 'hours');
+        var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
 
         return res.send(render_template('templates/busyroom.html', {
             now: now.format('dddd, Do MMM YYYY, hh:mm a'),
@@ -268,7 +269,7 @@ app.get('/busyroom', function(req, res){
             title: 'very long boring title That Just Keeps Going On And On And Seriously Really Long',
             description: 'Quick chat about something boring',
             start_time: '12:00',
-            end_time: '15:00',
+            end_time: '23:30',
             owner: 'Fergus Doyle',
             attendees: ['Shaun Stanworth', 'Matt Bennett']
         },

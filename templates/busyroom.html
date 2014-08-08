@@ -55,7 +55,7 @@
         </div>
 
         {% for item in schedule -%}
-            <div style="width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;</div>
+            <div style="left: {{item.from_start / 3}}%; width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;{{item.from_start}}</div>
         {%- endfor %}
     </div>
 </div>

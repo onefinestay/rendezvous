@@ -316,11 +316,11 @@ body, h1, h2, h3, h4, h5, h6 {
 
 #detail .attendees {
 	font-size: 1.5em;
-	margin-top: 20px;
+	margin-top: 40px;
 }
 
 #detail .description {
-	margin-top: 20px;
+	margin-top: 40px;
 }
 
 #schedule {
@@ -362,8 +362,7 @@ body, h1, h2, h3, h4, h5, h6 {
 }
 
 .schedule-item {
-	 float: left;
-	 display:inline;
+	 position: relative;
 }
 
 .busy {
