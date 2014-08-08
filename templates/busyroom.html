@@ -52,11 +52,10 @@
             <!-- current time marker -->
             <span id="time-marker" style="left: 50%" class="current-time-marker"></span>
 
-        </div>
-
         {% for item in schedule -%}
-            <div style="left: {{item.from_start / 3}}%; width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;{{item.from_start}}</div>
+            <div style="left: {{item.from_start / 3}}%; width: {{item.minutes / 3}}%;" class="schedule-item {{item.status}}" alt="{{item.title}}">&nbsp;</div>
         {%- endfor %}
+        </div>
     </div>
 </div>
 

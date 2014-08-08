@@ -327,6 +327,7 @@ body, h1, h2, h3, h4, h5, h6 {
 	text-transform: uppercase;
 	position: fixed;
 	bottom: 70px;
+	overflow: hidden;
 }
 
 .schedule-ct {
@@ -337,7 +338,7 @@ body, h1, h2, h3, h4, h5, h6 {
 
 .schedule-marker-ct {
 	position: relative;
-	height: 30px;
+	height: 60px;
 }
 
 .schedule-marker {
@@ -362,7 +363,8 @@ body, h1, h2, h3, h4, h5, h6 {
 }
 
 .schedule-item {
-	 position: relative;
+	 position: absolute;
+	 margin-top: 30px;
 }
 
 .busy {
