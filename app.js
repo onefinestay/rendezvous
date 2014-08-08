@@ -48,8 +48,8 @@ function render_template(template_path, context) {
 function Event(data) {
     this.title = data.summary;
     this.confirmed = data.confirmed;
-    this.start = moment(data.start.dateTime);
-    this.end = moment(data.end.dateTime);
+    this.start = moment.utc(data.start.dateTime);
+    this.end = moment.utc(data.end.dateTime);
     this.minutes = this.end.diff(this.start, 'minutes');
     this.attendees = [];
     this.status = 'busy';
@@ -62,7 +62,8 @@ function Event(data) {
 }
 
 Event.prototype.is_active = function() {
-    var now = moment();
+    var now = moment.utc();
+    console.log('now', now);
     return this.start.isBefore(now) && this.end.isAfter(now);
 }
 
@@ -157,7 +158,7 @@ function calculate_schedule(schedule, anchor) {
 
     for (var i=0; i<schedule.length; i++) {
         var ev = schedule[i];
-        console.log(ev.start.toISOString(), anchor.toISOString())
+        console.log("calc sched", ev.start.toISOString(), anchor.toISOString())
         ev.from_start = ev.start.diff(anchor, 'minutes');
         new_schedule.push(ev)
     }
@@ -177,7 +178,7 @@ app.get('/room/:name/', function(req, res) {
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
 
-        var now = moment()
+        var now = moment.utc()
         var room_data = schedule_for_room(data);
         var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
 
