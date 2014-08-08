@@ -139,8 +139,7 @@
             xmlHttp.open( "GET", '//' + window.location.host + '/free_rooms', false );
             xmlHttp.send( null );
             var free_rooms = JSON.parse(xmlHttp.responseText);
-            console.log(xmlHttp.responseText);
-            console.log(free_rooms);
+
 
             list_items = "";
             for (var i=0; i<free_rooms.length; i++) {
