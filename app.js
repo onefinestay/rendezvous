@@ -194,7 +194,10 @@ app.get('/room/:name/', function(req, res) {
     var accessToken     = req.session.access_token;
     var room            = rooms[req.params.name];
 
-    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+    gcal(accessToken).events.list(room.cal_id, {
+        maxResults: 100,
+        timeMin: moment(1, 'days').subtract().toISOString()
+    }, function(err, data) {
         if(err) return res.send(500,err);
 
         var now = moment.utc().tz(GMT);
