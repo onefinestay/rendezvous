@@ -7,19 +7,27 @@
 
 {% block content %}
 
-<div id="header" class="sixteen columns">
-    <div style="float: left">
-        <h4 data-bind="text: roomName"></h4>
-    </div>
-    <div style="float: right">
-        <h4 id="clock" data-bind="text: currentTimeLabel"></h4>
+
+
+<div id="header" class="row">
+    <div class="sixteen columns">
+        <div class="section">
+            <div class="room">
+                <h4 data-bind="text: roomName"></h4>
+            </div>
+            <div class="time">
+                <h4 id="clock" data-bind="text: currentTimeLabel"></h4>
+            </div>
+        </div>
     </div>
 </div>
 
 
 <div data-bind="if: roomInUse">
-    <div id="status" class="sixteen columns">
-        <span class="status" data-bind="text: currentEventTitle"></span>
+    <div id="status" class="row">
+        <div class="section">
+            <span class="status" data-bind="text: currentEventTitle"></span>
+        </div>
     </div>
 
     <div class="row" data-bind="visible: displayCountdown">
@@ -28,7 +36,12 @@
         </div>
     </div>
 
-    <h2 class="sixteen columns" id="meeting_end_label">Your meeting ends at <span data-bind="text: currentEventEndTimeLabel"></span></h2>
+    <h2 class="sixteen columns" id="meeting_end_label">
+        Your meeting ends at <span data-bind="text: currentEventEndTimeLabel"></span>
+
+        <a href="#" data-bind="click: finishMeeting">I'm Done</a>
+
+    </h2>
 </div>
 
 <div data-bind="ifnot: roomInUse">
@@ -73,11 +86,20 @@
             }, this);
 
             this.currentEventEndTimeLabel = ko.computed(function() {
-                return self.currentEventEndTime().format('hh:mm A');
+                if (self.currentEventEndTime() === undefined) {
+                    return '';
+                } else {
+                    return self.currentEventEndTime().format('hh:mm A');
+                }
+
             });
 
             this.currentEventRemainingSeconds = ko.computed(function() {
-                return self.currentEventEndTime().diff(self.currentTime(), 'seconds')
+                if (self.currentEventEndTime() === undefined) {
+                    return 0;
+                } else {
+                    return self.currentEventEndTime().diff(self.currentTime(), 'seconds')
+                }
             })
 
             this.displayCountdown = ko.computed(function() {
@@ -85,6 +107,19 @@
                 var decider = self.currentEventRemainingSeconds() % 10;
                 return self.roomInUse() && (decider < 7)
             })
+
+            this.finishMeeting = function() {
+                var jqxhr = $.post('');
+
+                jqxhr.done(function(data) {
+                    console.log(data);
+                    self.currentEventTitle(undefined);
+                    self.currentEventEndTime(undefined);
+
+                    self.roomInUse(false);
+                    self.nextMeetingLabel(data['next_meeting_label']);
+                });
+            }
 
         };
 
