@@ -82,6 +82,7 @@ app.get('/room/', function(req, res) {
 })
 
 app.post('/room/:id', function(req, res) {
+    req.session.lastUrl = req.originalUrl;
     if(!req.session.access_token) return res.redirect('/auth');
 
     var meetingLength = req.body.meetingLength;
@@ -122,6 +123,7 @@ app.post('/room/:id', function(req, res) {
 
 app.get('/room/:name/', function(req, res) {
     // gets the detail for the specified room
+    req.session.lastUrl = req.originalUrl;
     if(!req.session.access_token) return res.redirect('/auth');
 
     //Create an instance from accessToken
@@ -171,6 +173,8 @@ app.get('/room/:name/', function(req, res) {
 
 app.get('/room/:id/in-use', function(req, res) {
     // gets the detail for the specified room
+    console.log('Original URL' + req.originalUrl)
+    req.session.lastUrl = req.originalUrl;
     if(!req.session.access_token) return res.redirect('/auth');
 
     //Create an instance from accessToken
@@ -231,8 +235,14 @@ app.get('/auth/callback',
   function(req, res) {
     req.session.access_token = req.user.accessToken;
     req.session.gmail_address = req.user.emails[0]['value']
-    res.redirect('/');
+    console.log('Session last URL ' + req.session.lastUrl)
+    res.redirect(req.session.lastUrl || '/');
   });
+
+app.get('/auth/success', function(request, response) {
+  response.redirect(request.session.lastUrl || '/');
+});
+
 
 //demo page
 app.get('/busyroom', function(req, res){
@@ -295,7 +305,7 @@ app.get('/busyroom', function(req, res){
 */
 
 app.all('/cal', function(req, res){
-
+  req.session.lastUrl = req.originalUrl;
   if(!req.session.access_token) return res.redirect('/auth');
 
   //Create an instance from accessToken
@@ -308,7 +318,7 @@ app.all('/cal', function(req, res){
 });
 
 app.all('/cal/:calendarId', function(req, res){
-
+  req.session.lastUrl = req.originalUrl;
   if(!req.session.access_token) return res.redirect('/auth');
 
   //Create an instance from accessToken
@@ -334,6 +344,7 @@ app.all('/cal/:calendarId', function(req, res){
 });
 
 app.all('/cal/:calendarId/add', function(req, res) {
+    req.session.lastUrl = req.originalUrl;
 	if(!req.session.access_token) return res.redirect('/auth');
 
 	//Create an instance from accessToken
@@ -365,7 +376,7 @@ app.all('/cal/:calendarId/add', function(req, res) {
 
 
 app.all('/cal/:calendarId/:eventId', function(req, res){
-
+  req.session.lastUrl = req.originalUrl;
   if(!req.session.access_token) return res.redirect('/auth');
 
   //Create an instance from accessToken
