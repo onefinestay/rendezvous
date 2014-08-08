@@ -277,7 +277,10 @@ app.get('/free_rooms', function(req, res) {
         function(item, callback) {
             var room = rooms[item];
 
-            gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+            gcal(accessToken).events.list(room.cal_id, {
+                maxResults: 100,
+                timeMin: moment(1, 'days').subtract().toISOString()
+            }, function(err, data) {
                 if(err) return res.send(500,err);
 
                 var room_data = schedule_for_room(data);
@@ -336,7 +339,10 @@ app.get('/room/:id/in-use', function(req, res) {
     var accessToken     = req.session.access_token;
     var room            = rooms[req.params.id];
 
-    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+    gcal(accessToken).events.list(room.cal_id, {
+        maxResults: 100,
+        timeMin: moment(1, 'days').subtract().toISOString()
+    }, function(err, data) {
         if(err) return res.send(500,err);
 
         var current_event;
@@ -383,7 +389,10 @@ app.post('/room/:id/in-use', function(req, res) {
     var accessToken     = req.session.access_token;
     var room            = rooms[req.params.id];
 
-    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+    gcal(accessToken).events.list(room.cal_id, {
+        maxResults: 100,
+        timeMin: moment(1, 'days').subtract().toISOString()
+    }, function(err, data) {
         if(err) return res.send(500,err);
 
         var current_event;
