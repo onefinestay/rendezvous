@@ -74,7 +74,8 @@
             var self = this;
 
             this.currentTime = ko.observable(moment());
-            this.roomName = ko.observable("{{ room_name }}");
+
+            this.roomName = ko.observable("{{room.location }} // {{ room.name }}");
             this.currentEventTitle = ko.observable("{{ current_event.title }}");
             this.currentEventEndTime = ko.observable(moment("{{ current_event.end.toISOString() }}"));
 
@@ -133,6 +134,14 @@
         }, 1000);
 
         var clock;
+
+        if (vm.displayCountdown()) {
+            clock = new FlipClock($('.your-clock'), vm.currentEventRemainingSeconds(), {
+                // ... your options here
+                countdown: true,
+                showSeconds: false
+            });
+        }
 
         vm.displayCountdown.subscribe(function(newDisplayCountdown) {
             if (newDisplayCountdown) {
