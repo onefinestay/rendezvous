@@ -230,9 +230,16 @@ app.get('/free_rooms', function(req, res) {
                 if(err) return res.send(500,err);
 
                 var room_data = schedule_for_room(data);
-
+                var obj = {
+                    'name': room.name,
+                    'location': room.location
+                };
+                if (room_data.next_event) {
+                    // if tomorrow?
+                    obj['available_until'] = room_data.next_event.start.format('HH:mm');
+                }
                 if (!room_data.current_event) {
-                    callback(null, item);
+                    callback(null, obj);
                 } else {
                     callback(null, null)
                 }

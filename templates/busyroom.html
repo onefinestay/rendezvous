@@ -52,10 +52,11 @@
                    {{current_event.attendees|join(" ")}}
                 {% endif %}
             </div>
-
             {% if current_event %}
-            <h4>Alternative Rooms</h4>
-            <p id="free-rooms-list"></p>
+            <div class="alternatives">
+                <h4>Alternative Rooms</h4>
+                <ul id="free-rooms-list"></ul>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -133,7 +134,17 @@
         console.log(xmlHttp.responseText);
         console.log(free_rooms);
 
-        document.getElementById("free-rooms-list").innerHTML = free_rooms.join('<br/>');
+        list_items = "";
+        for (var i=0; i<free_rooms.length; i++) {
+            room = free_rooms[i];
+            room_str = room.location + " // " + room.name;
+            if (room.available_until) {
+                room_str += " [available until " + room.available_until +"] "
+            }
+            list_items += "<li>" + room_str + "</li>";
+        }
+
+        document.getElementById("free-rooms-list").innerHTML = list_items;
     }
     updateFreeRooms();
 
