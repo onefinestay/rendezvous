@@ -131,31 +131,32 @@
     updateTime();
     setInterval(updateTime, 1000);
 
+    {% if current_event %}
+        var updateFreeRooms = function() {
+            var xmlHttp = null;
 
-    var updateFreeRooms = function() {
-        var xmlHttp = null;
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", '//' + window.location.host + '/free_rooms', false );
+            xmlHttp.send( null );
+            var free_rooms = JSON.parse(xmlHttp.responseText);
+            console.log(xmlHttp.responseText);
+            console.log(free_rooms);
 
-        xmlHttp = new XMLHttpRequest();
-        xmlHttp.open( "GET", '//' + window.location.host + '/free_rooms', false );
-        xmlHttp.send( null );
-        var free_rooms = JSON.parse(xmlHttp.responseText);
-        console.log(xmlHttp.responseText);
-        console.log(free_rooms);
-
-        list_items = "";
-        for (var i=0; i<free_rooms.length; i++) {
-            room = free_rooms[i];
-            room_str = room.location + " // " + room.name;
-            if (room.available_until) {
-                room_str += " [available until " + room.available_until +"] "
+            list_items = "";
+            for (var i=0; i<free_rooms.length; i++) {
+                room = free_rooms[i];
+                room_str = room.location + " // " + room.name;
+                if (room.available_until) {
+                    room_str += " [available until " + room.available_until +"] "
+                }
+                list_items += "<li>" + room_str + "</li>";
             }
-            list_items += "<li>" + room_str + "</li>";
+
+            document.getElementById("free-rooms-list").innerHTML = list_items;
+
         }
-
-        document.getElementById("free-rooms-list").innerHTML = list_items;
-    }
-    updateFreeRooms();
-
+        updateFreeRooms();
+    {% endif %}
 </script>
 
 {% endblock %}

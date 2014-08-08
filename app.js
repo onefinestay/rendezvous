@@ -211,10 +211,12 @@ app.get('/room/:name/', function(req, res) {
                                             .add(moment.duration(len, 'minutes'))
                                             .seconds(0).millisecond(0);
 
-            if (room_data.next_event && meeting_finish.isBefore(room_data.next_event.start)) {
+            if (!room_data.next_event || meeting_finish.isBefore(room_data.next_event.start)) {
                 adhoc_times.push(meeting_finish);
             }
         }
+
+        console.log('adhoc', adhoc_times)
 
         return res.send(render_template('templates/busyroom.html', {
             room: room,
