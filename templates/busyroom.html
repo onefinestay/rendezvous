@@ -46,13 +46,15 @@
             <div class="title">
                 {{current_event.title}}
             </div>
-            <div class="attendees">
-                <span>Attendees:</span>
-                <span class="owner">{{current_event.owner}}</span>
-                {% if current_event.attendees %}
-                   {{current_event.attendees|join(" ")}}
-                {% endif %}
-            </div>
+            {% if current_event.attendees %}
+                <div class="attendees">
+                    <span>Attendees:</span>
+                    <span class="owner">{{current_event.owner}}</span>
+                    {% if current_event.attendees %}
+                       {{current_event.attendees|join(" ")}}
+                    {% endif %}
+                </div>
+            {% endif %}
 
             {% else %}
                 {% for time in adhoc_times %}
