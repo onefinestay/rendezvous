@@ -310,7 +310,6 @@ app.get('/free_rooms', function(req, res) {
 
 
 function get_next_meeting_label(accessToken, cal_id, callback) {
-    console.log('getting label');
     gcal(accessToken).events.list(cal_id, {
         maxResults: 10,
         timeMin: new Date().toISOString()
