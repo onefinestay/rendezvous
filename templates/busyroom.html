@@ -56,7 +56,7 @@
 
             {% else %}
                 {% for time in adhoc_times %}
-                    <a class="book-button three columns" href="/room/{{room.name}}/book/{{time.toISOString()}}">Book until {{time.format('hh:mm')}}</a>
+                    <a class="book-button three columns" href="/room/{{room.id}}/book/{{time.toISOString()}}">Book until {{time.format('hh:mm')}}</a>
                 {% endfor %}
             {% endif %}
             {% if current_event %}
