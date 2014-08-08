@@ -2,7 +2,7 @@ var express = require('express');
 var swig  = require('swig');
 var config = require('./config');
 var gcal = require('google-calendar');
-var moment = require('moment');
+var moment = require('moment-timezone');
 var bodyParser = require('body-parser');
 
 var app = express();
@@ -23,6 +23,8 @@ app.configure(function() {
 app.set('view cache', false);
 // To disable Swig's cache, do the following:
 swig.setDefaults({ cache: false });
+
+var GMT = "Europe/London";
 
 var rooms = {  // TODO: autopopulate?
     'boardroom': {
@@ -48,8 +50,8 @@ function render_template(template_path, context) {
 function Event(data) {
     this.title = data.summary;
     this.confirmed = data.confirmed;
-    this.start = moment.utc(data.start.dateTime);
-    this.end = moment.utc(data.end.dateTime);
+    this.start = moment.utc(data.start.dateTime).tz(GMT);
+    this.end = moment.utc(data.end.dateTime).tz(GMT);
     this.minutes = this.end.diff(this.start, 'minutes');
     this.attendees = [];
     this.status = 'busy';
@@ -176,7 +178,7 @@ app.get('/room/:name/', function(req, res) {
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
 
-        var now = moment.utc().local()
+        var now = moment.utc().tz(GMT);
         var room_data = schedule_for_room(data);
         var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
 
