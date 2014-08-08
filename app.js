@@ -232,7 +232,10 @@ app.get('/room/:id/in-use', function(req, res) {
             room: room,
             room_name: data.summary,
             current_event: current_event,
-            schedule: schedule
+            schedule: schedule,
+            room_in_use: current_event !== undefined,
+            // TODO get the actual next meeting label
+            next_meeting_label: "Company Meeting 2014"
         }));
     });
 });
