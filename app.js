@@ -203,7 +203,6 @@ app.get('/room/:name/', function(req, res) {
 
 app.get('/free_rooms', function(req, res) {
 
-    req.session.lastUrl = req.originalUrl;
     if(!req.session.access_token) return res.redirect('/auth');
 
     //Create an instance from accessToken
