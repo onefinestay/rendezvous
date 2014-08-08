@@ -82,7 +82,7 @@
             this.nextMeetingLabel = ko.observable("{{ next_meeting_label }}");
 
             this.currentTimeLabel = ko.computed(function() {
-                return self.currentTime().format('dddd, Do MMM YYYY, hh:mm a');
+                return self.currentTime().format('HH:mm');
             }, this);
 
             this.currentEventEndTimeLabel = ko.computed(function() {
