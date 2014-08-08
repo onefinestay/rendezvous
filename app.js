@@ -29,15 +29,21 @@ var GMT = "Europe/London";
 
 var rooms = {  // TODO: autopopulate?
     'boardroom': {
-        name: 'boardroom',
+        id: 'boardroom',
+        name: 'The Boardroom',
+        location: '300 SJS',
         cal_id: 'tintofs.com_43522d4e59432d31342d31322d4252@resource.calendar.google.com'
     },
     'study': {
-        name: 'study',
+        id: 'study',
+        name: 'The Study',
+        location: '300 SJS',
         cal_id: 'tintofs.com_2d3838353536353633313930@resource.calendar.google.com'
     },
     'drawingroom': {
-        name: 'drawingroom',
+        id: 'drawingroom',
+        name: 'The Drawing Room',
+        location: '300 SJS',
         cal_id: 'tintofs.com_2d3938353839353535393236@resource.calendar.google.com'
     },
 };
@@ -49,6 +55,7 @@ function render_template(template_path, context) {
 
 
 function Event(data) {
+    
     this.title = data.summary;
     this.confirmed = data.confirmed;
     this.start = moment.utc(data.start.dateTime).tz(GMT);
@@ -58,8 +65,13 @@ function Event(data) {
     this.status = 'busy';
 
     for (var i=0; i<data.attendees.length; i++) {
-        if (data.attendees[i].resource !== true) {
-            this.attendees.push(data.attendees[i]);
+        attendee =  data.attendees[i]
+        if (attendee.resource !== true) {
+            if (attendee.organizer == true) {
+                this.owner = attendee.displayName;
+            } else {
+                this.attendees.push(attendee.displayName);
+            }
         }
     }
 }
@@ -191,7 +203,6 @@ app.get('/room/:name/', function(req, res) {
 
         return res.send(render_template('templates/busyroom.html', {
             room: room,
-            room_name: req.params.name,
             start_time: start_time,
             current_event: room_data.current_event,
             next_event: room_data.next_event,

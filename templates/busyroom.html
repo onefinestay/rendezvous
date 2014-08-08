@@ -2,7 +2,7 @@
 
 {% block head %}
     {% parent %}
-    <meta http-equiv="refresh" content="60; URL=/room/{{room.name}}/">
+    <meta http-equiv="refresh" content="60; URL=/room/{{room.id}}/">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
 {% endblock %}
@@ -12,7 +12,7 @@
     <div class="sixteen columns">
         <div class="section">
             <div class="room">
-                <h4>{{room_name}}</h4>
+                <h4>{{room.location}} // {{room.name}}</h4>
             </div>
             <div class="time">
                 <h4 id="clock">00:00</h4>
@@ -39,27 +39,28 @@
     </div>
 </div>
 
-<div id"main" class="row">
-        <div id="detail" class="fourteen columns alpha">
+<div id="detail" class="row">
+    <div class="sixteen columns">
+        <div class="section">
             <div class="title">
                 {{current_event.title}}
             </div>
             <div class="attendees">
-                <!-- span class="owner">{{current_event.owner}}</span -->
+                <span>Attendees:</span>
+                <span class="owner">{{current_event.owner}}</span>
                 {% if current_event.attendees %}
                    {{current_event.attendees|join(" ")}}
                 {% endif %}
             </div>
-            <!--div class="description">
-                {{current_event.description}}
-            </div-->
-        </div>
 
-        <div id="free-rooms" class="two columns omega">
-            <h4>Currently free:</h4>
+            {% if current_event %}
+            <h4>Alternative Rooms</h4>
             <p id="free-rooms-list"></p>
+            {% endif %}
         </div>
+    </div>
 </div>
+
 
 <div id="schedule" class="row">
     <div class="sixteen columns">
