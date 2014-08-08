@@ -15,10 +15,10 @@
     <div class="sixteen columns">
         <div class="section">
             <div class="room">
-                <h4 data-bind="text: roomName"></h4>
+                <h4 data-bind="text: roomName">{{room_name}}</h4>
             </div>
             <div class="time">
-                <h4 id="clock" data-bind="text: currentTimeLabel"></h4>
+                <h4 id="clock" data-bind="text: currentTimeLabel">XX:XX</h4>
             </div>
         </div>
     </div>
@@ -38,10 +38,10 @@
         </div>
     </div>
 
+    <a class="book-button four columns" href="#" data-bind="click: finishMeeting">I'm Done</a>
+
     <h2 class="sixteen columns" id="meeting_end_label">
         Your meeting ends at <span data-bind="text: currentEventEndTimeLabel"></span>
-
-        <a href="#" data-bind="click: finishMeeting">I'm Done</a>
 
     </h2>
 </div>
@@ -96,7 +96,7 @@
                 if (self.currentEventEndTime() === undefined) {
                     return '';
                 } else {
-                    return self.currentEventEndTime().format('hh:mm A');
+                    return self.currentEventEndTime().format('HH:mm');
                 }
 
             });
@@ -110,9 +110,8 @@
             })
 
             this.displayCountdown = ko.computed(function() {
-                // TODO Base on actual remaining time e.g. 5m
-                var decider = self.currentEventRemainingSeconds() % 10;
-                return self.roomInUse() && (decider < 7)
+                var decider = self.currentEventRemainingSeconds();
+                return self.roomInUse() && (decider < (60 * 5))
             })
 
             this.finishMeeting = function() {
@@ -171,13 +170,12 @@
         vm.currentEventRemainingSeconds.subscribe(function(newRemainingSecs) {
             if (vm.roomInUse()) {
 
-                // TODO: decide based on actual value of time instead
-                var decider = newRemainingSecs % 10;
+                var decider = newRemainingSecs;
 
-                if (decider < 2) {
+                if (decider < (2 * 60)) {
                     $('body').addClass('impolite-warning')
                     $('body').removeClass('polite-warning');
-                } else if (decider < 4) {
+                } else if (decider < (8 * 60)) {
                     $('body').addClass('polite-warning')
                     $('body').removeClass('impolite-warning');
                 } else {
@@ -205,7 +203,7 @@
     }
 
     #meeting_end_label {
-        text-align: center;
+        margin-top: 30px;
         border: 1px solid transparent;
         line-height: 48px;
         border-radius: 16px;
@@ -214,11 +212,13 @@
     .polite-warning #meeting_end_label {
         border-color: yellow;
         background-color: #ffffcc;
+        padding: 30px;
     }
 
     .impolite-warning #meeting_end_label {
         border-color: red;
         background-color: #ff6666;
+        padding: 30px;
     }
 
 
