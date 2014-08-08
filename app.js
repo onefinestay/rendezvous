@@ -242,6 +242,58 @@ app.get('/room/:id/in-use', function(req, res) {
 });
 
 
+app.post('/room/:id/in-use', function(req, res) {
+    req.session.lastUrl = req.originalUrl;
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.id];
+
+    gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+        if(err) return res.send(500,err);
+
+        var current_event;
+        var g_event;
+        var schedule = [];
+
+        for (var i=0; i<data.items.length; i++) {
+            var ev;
+            try {
+                g_event = data.items[i];
+                ev = new Event(data.items[i]);
+            } catch (e) {
+                // malformed data
+                console.log(e);
+            }
+
+            if (ev.confirmed !== true) {
+                schedule.push(ev);
+
+                if (ev.is_active()) {
+                    current_event = ev;
+                    break;
+                }
+            }
+        }
+
+        if (current_event === undefined) {
+            throw new Error();
+        }
+
+        var event_id = g_event['id'];
+        g_event['end']['dateTime'] = moment().toISOString();
+
+        gcal(accessToken).events.update(room.cal_id, event_id, g_event, function(err, result) {
+            return res.send({
+                // TODO get the actual next meeting label
+                next_meeting_label: "Company Meeting 2014"
+            });
+        });
+    });
+});
+
+
 passport.use(new GoogleStategy({
 	clientID: config.consumer_key,
 	clientSecret: config.consumer_secret,
