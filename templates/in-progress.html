@@ -7,19 +7,27 @@
 
 {% block content %}
 
-<div id="header" class="sixteen columns">
-    <div style="float: left">
-        <h4 data-bind="text: roomName"></h4>
-    </div>
-    <div style="float: right">
-        <h4 id="clock" data-bind="text: currentTimeLabel"></h4>
+
+
+<div id="header" class="row">
+    <div class="sixteen columns">
+        <div class="section">
+            <div class="room">
+                <h4 data-bind="text: roomName"></h4>
+            </div>
+            <div class="time">
+                <h4 id="clock" data-bind="text: currentTimeLabel"></h4>
+            </div>
+        </div>
     </div>
 </div>
 
 
 <div data-bind="if: roomInUse">
-    <div id="status" class="fourteen columns">
-        <span class="status" data-bind="text: currentEventTitle"></span>
+    <div id="status" class="row">
+        <div class="section">
+            <span class="status" data-bind="text: currentEventTitle"></span>
+        </div>
     </div>
 
     <div class="row" data-bind="visible: displayCountdown">
@@ -101,7 +109,7 @@
             })
 
             this.finishMeeting = function() {
-                var jqxhr = $.post('.');
+                var jqxhr = $.post('');
 
                 jqxhr.done(function(data) {
                     console.log(data);
