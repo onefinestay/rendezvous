@@ -15,7 +15,7 @@
     <span class="status">Busy</span> until <span class="time">{{current_event.end.format('hh:mm')}}</span>
 </div>
 
-<div id="detail" class="sixteen columns">
+<div id="detail" class="fourteen columns">
     <div class="title">
         {{current_event.title}}
     </div>
@@ -28,6 +28,11 @@
     <!--div class="description">
         {{current_event.description}}
     </div-->
+</div>
+
+<div id="free-rooms" class="two columns">
+    <h2>Currently free:</h2>
+    <p id="free-rooms-list"></p>
 </div>
 
 <!-- WHY?! -->
@@ -88,6 +93,22 @@
     }
     updateTime();
     setInterval(updateTime, 1000);
+
+
+    var updateFreeRooms = function() {
+        var xmlHttp = null;
+
+        xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", '//' + window.location.host + '/free_rooms', false );
+        xmlHttp.send( null );
+        var free_rooms = JSON.parse(xmlHttp.responseText);
+        console.log(xmlHttp.responseText);
+        console.log(free_rooms);
+
+        document.getElementById("free-rooms-list").innerHTML = free_rooms.join('<br/>');
+    }
+    updateFreeRooms();
+    setInterval(updateFreeRooms, 1000)
 
 </script>
 
