@@ -57,7 +57,9 @@
 
                 <div class="alternatives">
                     <h4>Alternative Rooms</h4>
-                    <ul id="free-rooms-list"></ul>
+                    <ul id="free-rooms-list">
+                        <li>None</li>
+                    </ul>
                 </div>
             {% else %}
                 <div class="title">Book until:</div>
@@ -164,8 +166,9 @@
                 list_items += "<li>" + room_str + "</li>";
             }
 
-            document.getElementById("free-rooms-list").innerHTML = list_items;
-
+            if (list_items) {
+                document.getElementById("free-rooms-list").innerHTML = list_items;
+            }
         }
         updateFreeRooms();
     {% endif %}
