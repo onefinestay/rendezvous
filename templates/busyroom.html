@@ -63,7 +63,7 @@
                 <div class="title">Book until:</div>
                 <br />
                 {% for time in adhoc_times %}
-                    <a class="book-button three columns" href="/room/{{room.id}}/book/{{time.toISOString()}}">{{time.format('hh:mm')}}</a>
+                    <a class="book-button three columns" href="/room/{{room.id}}/book/{{time.toISOString()}}">{{time.format('HH:mm')}}</a>
                 {% endfor %}
             {% endif %}
         </div>
