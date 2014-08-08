@@ -279,16 +279,26 @@ body, h1, h2, h3, h4, h5, h6 {
 	background-attachment:fixed;
 	background-repeat: no-repeat;
 }
+
+.section {
+	padding: 20px;
+}
+
 #header {
 	font-size: 1.2em;
 	text-transform: uppercase;
-	padding: 2em 0em 1em 0em;
+}
+
+#header .room {
+	float:left;
+}
+
+#header .time {
+	float: right;
 }
 
 #status {
 	font-size: 3em;
-	margin-top: 1em;
-	margin-bottom: 1em;
 }
 
 #status span.status {
@@ -300,33 +310,21 @@ body, h1, h2, h3, h4, h5, h6 {
 	font-size: 1.5em;
 }
 
-
 #detail {
 	font-size: 1.2em;
-	margin-top: 30px;
-	margin-bottom: 20px;
 }
 
 #detail .title {
 	font-size: 2em;
 	text-transform: capitalize;
 	line-height: 100%;
-	padding: 0em 1em 0em 0em;
-}
 
-#detail .attendees {
-	font-size: 1.5em;
-	margin-top: 40px;
-}
-
-#detail .description {
-	margin-top: 40px;
 }
 
 #schedule {
 	text-transform: uppercase;
 	position: fixed;
-	bottom: 70px;
+	bottom: 0px;
 	overflow: hidden;
 }
 
