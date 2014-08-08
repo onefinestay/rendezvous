@@ -299,6 +299,21 @@ app.get('/free_rooms', function(req, res) {
 });
 
 
+function get_next_meeting_label(accessToken, cal_id, callback) {
+    console.log('getting label');
+    gcal(accessToken).events.list(cal_id, {
+        maxResults: 10,
+        timeMin: new Date().toISOString()
+    }, function(err, data) {
+        var label = 'Nothing!';
+        if (data.items.length > 0) {
+            label = data.items[0]['summary']
+        }
+        callback(label);
+    });
+}
+
+
 app.get('/room/:id/in-use', function(req, res) {
     // gets the detail for the specified room
     console.log('Original URL' + req.originalUrl)
@@ -333,16 +348,17 @@ app.get('/room/:id/in-use', function(req, res) {
             }
         }
 
-        return res.send(render_template('templates/in-progress.html', {
-            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
-            room: room,
-            room_name: data.summary,
-            current_event: current_event,
-            schedule: schedule,
-            room_in_use: current_event !== undefined,
-            // TODO get the actual next meeting label
-            next_meeting_label: "Company Meeting 2014"
-        }));
+        get_next_meeting_label(accessToken, room.cal_id, function(next_label) {
+            return res.send(render_template('templates/in-progress.html', {
+                now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+                room: room,
+                room_name: data.summary,
+                current_event: current_event,
+                schedule: schedule,
+                room_in_use: current_event !== undefined,
+                next_meeting_label: next_label
+            }));
+        })
     });
 });
 
@@ -390,10 +406,13 @@ app.post('/room/:id/in-use', function(req, res) {
         g_event['end']['dateTime'] = moment().toISOString();
 
         gcal(accessToken).events.update(room.cal_id, event_id, g_event, function(err, result) {
-            return res.send({
-                // TODO get the actual next meeting label
-                next_meeting_label: "Company Meeting 2014"
-            });
+
+            get_next_meeting_label(accessToken, room.cal_id, function(next_label) {
+
+                return res.send({
+                    next_meeting_label: next_label
+                });
+            })
         });
     });
 });
