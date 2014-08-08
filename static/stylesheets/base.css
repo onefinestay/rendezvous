@@ -396,4 +396,6 @@ body, h1, h2, h3, h4, h5, h6 {
 	line-height: 120px;
 	text-decoration: none;
 	padding: 0px 0px 0px 10px;
+
+	border-radius: 15px;
 }
