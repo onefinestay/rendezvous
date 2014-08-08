@@ -231,7 +231,6 @@ app.get('/free_rooms', function(req, res) {
                     free_rooms.push(result);
                 }
             }
-            console.log('free rooms ' + free_rooms)
             return res.send(free_rooms);
         }
     )
