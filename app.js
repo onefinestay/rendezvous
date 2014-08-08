@@ -128,7 +128,10 @@ app.post('/room/:id', function(req, res) {
 
 function schedule_for_room(data) {
     var current_event;
+    var next_event;
     var schedule = [];
+
+    var now = moment.utc();
 
     for (var i=0; i<data.items.length; i++) {
         var ev;
@@ -141,14 +144,18 @@ function schedule_for_room(data) {
         if (ev.confirmed !== true) {
             schedule.push(ev);
 
-            if (ev.is_active()) {
+            if (ev.start.isBefore(now) && ev.end.isAfter(now)) {
                 current_event = ev;
+            }
+            else if (!next_event && ev.start.isAfter(now)) {
+                next_event = ev;
             }
         }
     }
 
     return {
         current_event: current_event,
+        next_event: next_event,
         schedule: schedule
     }
 }
@@ -183,11 +190,11 @@ app.get('/room/:name/', function(req, res) {
         var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
 
         return res.send(render_template('templates/busyroom.html', {
-            now: now.format('dddd, Do MMM YYYY, hh:mm a'),
             room: room,
             room_name: req.params.name,
             start_time: start_time,
             current_event: room_data.current_event,
+            next_event: room_data.next_event,
             schedule: calculate_schedule(room_data.schedule, start_time)
         }));
     });
@@ -310,61 +317,6 @@ app.get('/auth/callback',
 
 app.get('/auth/success', function(request, response) {
   response.redirect(request.session.lastUrl || '/');
-});
-
-
-//demo page
-app.get('/busyroom', function(req, res){
-
-    var time = new Date()
-    var start_hour = time.getHours() - 1;
-
-    var template = swig.compileFile('templates/busyroom.html');
-    var output = template({
-        room_name: "The Study",
-        current: {
-            title: 'very long boring title That Just Keeps Going On And On And Seriously Really Long',
-            description: 'Quick chat about something boring',
-            start_time: '12:00',
-            end_time: '23:30',
-            owner: 'Fergus Doyle',
-            attendees: ['Shaun Stanworth', 'Matt Bennett']
-        },
-        start_hour: start_hour,
-        schedule: [
-            {
-                'status': 'busy',
-                'title': 'event-0',
-                'minutes': 15,
-            },
-            {
-                'status': 'free',
-                'title': 'event-1',
-                'minutes': 30,
-            },
-            {
-                'status': 'busy',
-                'title': 'event-2',
-                'minutes': 45,
-            },
-            {
-                'status': 'free',
-                'title': 'event-3',
-                'minutes': 60,
-            },
-            {
-                'status': 'busy',
-                'title': 'event-4',
-                'minutes': 80,
-            },
-            {
-                'status': 'free',
-                'title': 'event-5',
-                'minutes': 70,
-            }],
-        project_name: 'Rendezvous',
-    });
-    res.send(output);
 });
 
 

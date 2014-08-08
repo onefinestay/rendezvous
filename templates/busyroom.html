@@ -12,7 +12,17 @@
 </div>
 
 <div id="status" class="sixteen columns">
-    <span class="status">Busy</span> until <span class="time">{{current_event.end.format('hh:mm')}}</span>
+    {% if current_event %}
+        <span class="status">Busy</span>
+        until
+        <span class="time">{{current_event.end.format('HH:mm')}}</span>
+    {% else %}
+        <span class="status">Available</span>
+        {% if next_event %}
+            until
+            <span class="time">{{next_event.start.format('HH:mm')}}</span>
+        {% endif %}
+    {% endif %}
 </div>
 
 <div id="detail" class="fourteen columns">
