@@ -236,7 +236,7 @@ app.get('/room/:name/book/:end', function(req, res) {
     //Create an instance from accessToken
     var accessToken     = req.session.access_token;
     var calendarId      = rooms[req.params.name].cal_id;
-    var now             = moment.utc().tz(GMT).toISOString();
+    var now             = moment.utc().tz(GMT).minutes(0).seconds(0).millisecond(0).toISOString();
     var end             = req.params.end
 
     var event = {
