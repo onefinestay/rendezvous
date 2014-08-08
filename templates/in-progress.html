@@ -111,10 +111,10 @@
         });
 
         vm.currentEventRemainingSeconds.subscribe(function(newRemainingSecs) {
-            if (newRemainingSecs <= 0) {
-                vm.roomInUse(false);
-            } else {
+            if (newRemainingSecs > 0) {
                 vm.roomInUse(true);
+            } else {
+                vm.roomInUse(false);
             }
         });
 
