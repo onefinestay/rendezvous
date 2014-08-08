@@ -40,7 +40,7 @@
 </div>
 
 <div id="detail" class="row">
-    <div class="sixteen columns">
+    <div class="twelve columns alpha">
         <div class="section">
             {% if current_event %}
                 <div class="title">
@@ -68,8 +68,12 @@
             {% endif %}
         </div>
     </div>
+    <div class="four columns omega">
+        <div class="section">
+            <a id="finish-meeting" class="book-button three columns" href="#">Finish</a>
+        </div>
+    </div>
 </div>
-
 
 <div id="schedule" class="row">
     <div class="sixteen columns">
@@ -106,6 +110,12 @@
 
 {% block js %}
 <script type="text/javascript">
+    
+    $( "#finish-meeting" ).click(function() {
+        $.post(window.location + 'in-use/', function() {
+            window.location.reload();
+        })
+    });
 
     var updateTime = function() {
         var time = new Date();
