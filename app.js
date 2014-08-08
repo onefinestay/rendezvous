@@ -55,7 +55,7 @@ function render_template(template_path, context) {
 
 
 function Event(data) {
-    
+
     this.title = data.summary;
     this.confirmed = data.confirmed;
     this.start = moment.utc(data.start.dateTime).tz(GMT);
@@ -252,8 +252,6 @@ app.get('/room/:name/book/:end', function(req, res) {
     };
 
     gcal(accessToken).events.insert(calendarId, event, function(err, result) {
-        console.log(err);
-        console.log(result);
         return res.redirect('/room/' + req.params.name + '/');
     });
 });
