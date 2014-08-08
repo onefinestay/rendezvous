@@ -1,3 +1,4 @@
+var async = require('async');
 var express = require('express');
 var swig  = require('swig');
 var config = require('./config');
@@ -138,7 +139,6 @@ function schedule_for_room(data) {
             ev = new Event(data.items[i]);
         } catch (e) {
             // malformed data
-            console.log(e);
         }
 
         if (ev.confirmed !== true) {
@@ -201,6 +201,50 @@ app.get('/room/:name/', function(req, res) {
 });
 
 
+app.get('/free_rooms', function(req, res) {
+
+    req.session.lastUrl = req.originalUrl;
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var room            = rooms[req.params.name];
+    var free_rooms      = [];
+
+    async.map(
+        Object.keys(rooms),
+        function(item, callback) {
+            var room = rooms[item];
+
+            gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
+                if(err) return res.send(500,err);
+
+                var room_data = schedule_for_room(data);
+
+                if (!room_data.current_event) {
+                    callback(null, item);
+                } else {
+                    callback(null, null)
+                }
+
+            });
+        },
+        function(err, results) {
+            var free_rooms = [];
+
+            for (var i=0;i<results.length;i++) {
+                var result = results[i];
+                if (result !== null) {
+                    free_rooms.push(result);
+                }
+            }
+            console.log('free rooms ' + free_rooms)
+            return res.send(free_rooms);
+        }
+    )
+});
+
+
 app.get('/room/:id/in-use', function(req, res) {
     // gets the detail for the specified room
     console.log('Original URL' + req.originalUrl)
@@ -240,7 +284,10 @@ app.get('/room/:id/in-use', function(req, res) {
             room: room,
             room_name: data.summary,
             current_event: current_event,
-            schedule: schedule
+            schedule: schedule,
+            room_in_use: current_event !== undefined,
+            // TODO get the actual next meeting label
+            next_meeting_label: "Company Meeting 2014"
         }));
     });
 });
