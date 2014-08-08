@@ -70,7 +70,9 @@
     </div>
     <div class="four columns omega">
         <div class="section">
-            <a id="finish-meeting" class="book-button three columns" href="#">Finish</a>
+            {% if current_event %}
+                <a id="finish-meeting" class="book-button three columns" href="#">Finish</a>
+            {% endif %}
         </div>
     </div>
 </div>
