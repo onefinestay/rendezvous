@@ -397,3 +397,7 @@ body, h1, h2, h3, h4, h5, h6 {
 	text-decoration: none;
 	padding: 0px 0px 0px 10px;
 }
+
+#finish-meeting {
+	height: 170px;
+}

@@ -219,8 +219,6 @@ app.get('/room/:name/', function(req, res) {
             }
         }
 
-        console.log('adhoc', adhoc_times)
-
         return res.send(render_template('templates/busyroom.html', {
             room: room,
             start_time: start_time,

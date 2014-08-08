@@ -73,7 +73,9 @@
     <div class="four columns omega">
         <div class="section">
             {% if current_event %}
-                <a id="finish-meeting" class="book-button three columns" href="#">Finish</a>
+                <a id="finish-meeting" class="book-button three columns" href="#" height=170>
+                    <img src="/static/images/bin.svg" width=80 style="margin-left:35px; margin-top: 30px;">
+                </a>
             {% endif %}
         </div>
     </div>
@@ -114,7 +116,7 @@
 
 {% block js %}
 <script type="text/javascript">
-    
+
     $( "#finish-meeting" ).click(function() {
         $.post(window.location + 'in-use/', function() {
             window.location.reload();
