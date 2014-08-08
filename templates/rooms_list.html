@@ -6,7 +6,7 @@
     <h1>Rooms</h1>
 
     {% for room in rooms %}
-    <li><a href="/room/{{room.name}}/">{{room.name|title}}</a></li>
+    <li><a href="/room/{{room.id}}/">{{room.name|title}}</a> <a href="/room/{{room.id}}/in-use">(In-room view)</a></li>
     {% endfor %}
 {% endblock %}
 

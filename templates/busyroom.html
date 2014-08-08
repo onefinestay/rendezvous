@@ -42,9 +42,11 @@
 <div id="detail" class="row">
     <div class="sixteen columns">
         <div class="section">
+            {% if current_event %}
             <div class="title">
                 {{current_event.title}}
             </div>
+
             <div class="attendees">
                 <span>Attendees:</span>
                 <span class="owner">{{current_event.owner}}</span>
@@ -53,10 +55,16 @@
                 {% endif %}
             </div>
             {% if current_event %}
-            <div class="alternatives">
-                <h4>Alternative Rooms</h4>
-                <ul id="free-rooms-list"></ul>
-            </div>
+                <div class="alternatives">
+                    <h4>Alternative Rooms</h4>
+                    <ul id="free-rooms-list"></ul>
+                </div>
+            {% else %}
+                <div class="title">Book until:</div>
+                <br />
+                {% for time in adhoc_times %}
+                    <a class="book-button three columns" href="/room/{{room.id}}/book/{{time.toISOString()}}">{{time.format('hh:mm')}}</a>
+                {% endfor %}
             {% endif %}
         </div>
     </div>

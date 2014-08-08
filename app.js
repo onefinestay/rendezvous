@@ -55,7 +55,7 @@ function render_template(template_path, context) {
 
 
 function Event(data) {
-    
+
     this.title = data.summary;
     this.confirmed = data.confirmed;
     this.start = moment.utc(data.start.dateTime).tz(GMT);
@@ -199,15 +199,60 @@ app.get('/room/:name/', function(req, res) {
 
         var now = moment.utc().tz(GMT);
         var room_data = schedule_for_room(data);
-        var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
+        var start_time = moment(now).minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
+
+        var offset = moment.duration(15 - (now.minutes() % 15), 'minutes');
+        var adhoc_defaults = [15, 30, 60];
+        var adhoc_times = [];
+
+        for (var i=0;i<adhoc_defaults.length;i++) {
+            var len = adhoc_defaults[i];
+            var meeting_finish = moment(now).add(offset, 'minutes')
+                                            .add(moment.duration(len, 'minutes'))
+                                            .seconds(0).millisecond(0);
+
+            if (room_data.next_event && meeting_finish.isBefore(room_data.next_event.start)) {
+                adhoc_times.push(meeting_finish);
+            }
+        }
 
         return res.send(render_template('templates/busyroom.html', {
             room: room,
             start_time: start_time,
             current_event: room_data.current_event,
             next_event: room_data.next_event,
-            schedule: calculate_schedule(room_data.schedule, start_time)
+            schedule: calculate_schedule(room_data.schedule, start_time),
+            adhoc_times: adhoc_times
         }));
+    });
+});
+
+
+app.get('/room/:name/book/:end', function(req, res) {
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var calendarId      = rooms[req.params.name].cal_id;
+    var now             = moment.utc().tz(GMT).toISOString();
+    var end             = req.params.end
+
+    var event = {
+        'summary': 'Ad-hoc meeting',
+        'start'  : {'dateTime': now},
+        'end'    : {'dateTime': end},
+        'attendees': [
+            {
+                'email': calendarId // the user from the URL
+            },
+            {
+                'email': req.session.gmail_address  // the logged in user
+            }
+        ]
+    };
+
+    gcal(accessToken).events.insert(calendarId, event, function(err, result) {
+        return res.redirect('/room/' + req.params.name + '/');
     });
 });
 
@@ -261,6 +306,21 @@ app.get('/free_rooms', function(req, res) {
 });
 
 
+function get_next_meeting_label(accessToken, cal_id, callback) {
+    console.log('getting label');
+    gcal(accessToken).events.list(cal_id, {
+        maxResults: 10,
+        timeMin: new Date().toISOString()
+    }, function(err, data) {
+        var label = 'Nothing!';
+        if (data.items.length > 0) {
+            label = data.items[0]['summary']
+        }
+        callback(label);
+    });
+}
+
+
 app.get('/room/:id/in-use', function(req, res) {
     // gets the detail for the specified room
     console.log('Original URL' + req.originalUrl)
@@ -295,16 +355,17 @@ app.get('/room/:id/in-use', function(req, res) {
             }
         }
 
-        return res.send(render_template('templates/in-progress.html', {
-            now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
-            room: room,
-            room_name: data.summary,
-            current_event: current_event,
-            schedule: schedule,
-            room_in_use: current_event !== undefined,
-            // TODO get the actual next meeting label
-            next_meeting_label: "Company Meeting 2014"
-        }));
+        get_next_meeting_label(accessToken, room.cal_id, function(next_label) {
+            return res.send(render_template('templates/in-progress.html', {
+                now: moment().format('dddd, Do MMM YYYY, hh:mm a'),
+                room: room,
+                room_name: data.summary,
+                current_event: current_event,
+                schedule: schedule,
+                room_in_use: current_event !== undefined,
+                next_meeting_label: next_label
+            }));
+        })
     });
 });
 
@@ -352,10 +413,13 @@ app.post('/room/:id/in-use', function(req, res) {
         g_event['end']['dateTime'] = moment().toISOString();
 
         gcal(accessToken).events.update(room.cal_id, event_id, g_event, function(err, result) {
-            return res.send({
-                // TODO get the actual next meeting label
-                next_meeting_label: "Company Meeting 2014"
-            });
+
+            get_next_meeting_label(accessToken, room.cal_id, function(next_label) {
+
+                return res.send({
+                    next_meeting_label: next_label
+                });
+            })
         });
     });
 });
@@ -388,100 +452,6 @@ app.get('/auth/success', function(request, response) {
   response.redirect(request.session.lastUrl || '/');
 });
 
-
-/*
-  ===========================================================================
-                               Google Calendar
-  ===========================================================================
-*/
-
-app.all('/cal', function(req, res){
-  req.session.lastUrl = req.originalUrl;
-  if(!req.session.access_token) return res.redirect('/auth');
-
-  //Create an instance from accessToken
-  var accessToken = req.session.access_token;
-
-  gcal(accessToken).calendarList.list(function(err, data) {
-    if(err) return res.send(500,err);
-    return res.send(data);
-  });
-});
-
-app.all('/cal/:calendarId', function(req, res){
-  req.session.lastUrl = req.originalUrl;
-  if(!req.session.access_token) return res.redirect('/auth');
-
-  //Create an instance from accessToken
-  var accessToken     = req.session.access_token;
-  var calendarId      = req.params.calendarId;
-
-  gcal(accessToken).events.list(calendarId, {
-  	maxResults:10,
-  	timeMin: new Date().toISOString()
-  }, function(err, data) {
-    if(err) return res.send(500,err);
-
-    console.log(data)
-    if(data.nextPageToken){
-      gcal(accessToken).events.list(calendarId, {maxResults:1, pageToken:data.nextPageToken}, function(err, data) {
-        console.log(data.items)
-      })
-    }
-
-
-    return res.send(data);
-  });
-});
-
-app.all('/cal/:calendarId/add', function(req, res) {
-    req.session.lastUrl = req.originalUrl;
-	if(!req.session.access_token) return res.redirect('/auth');
-
-	//Create an instance from accessToken
-	var accessToken     = req.session.access_token;
-	var calendarId      = req.params.calendarId;
-
-    var event = {
-        'summary': 'Test03',
-        'start': {
-            'dateTime': '2014-08-07T17:00:00Z'
-        },
-        'end': {
-            'dateTime': '2014-08-07T17:05:00Z'
-        },
-        'attendees': [
-            {
-                'email': calendarId // the user from the URL
-            },
-            {
-                'email': req.session.gmail_address  // the logged in user
-            }
-        ]
-    };
-
-	gcal(accessToken).events.insert(calendarId, event, function(err, result) {
-        return res.send(result);
-    });
-});
-
-
-app.all('/cal/:calendarId/:eventId', function(req, res){
-  req.session.lastUrl = req.originalUrl;
-  if(!req.session.access_token) return res.redirect('/auth');
-
-  //Create an instance from accessToken
-  var accessToken     = req.session.access_token;
-  var calendarId      = req.params.calendarId;
-  var eventId         = req.params.eventId;
-
-  gcal(accessToken).events.get(calendarId, eventId, function(err, data) {
-    if(err) return res.send(500,err);
-    return res.send(data);
-  });
-});
-
-
-// server
+require('./cal_api')(app, gcal);
 
 app.listen(port);

@@ -48,6 +48,10 @@
     <div id="status" class="sixteen columns">Next up: <span data-bind="text: nextMeetingLabel"></span></div>
 </div>
 
+
+        <!--<div class=" sixteen columns"><pre data-bind="text: ko.toJSON($root, null, 2)"></pre></div>-->
+
+
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="/static/js/flipclock.js"></script>
 <script src="/static/js/moment.js"></script>
@@ -74,7 +78,8 @@
             var self = this;
 
             this.currentTime = ko.observable(moment());
-            this.roomName = ko.observable("{{ room_name }}");
+
+            this.roomName = ko.observable("{{room.location }} // {{ room.name }}");
             this.currentEventTitle = ko.observable("{{ current_event.title }}");
             this.currentEventEndTime = ko.observable(moment("{{ current_event.end.toISOString() }}"));
 
@@ -82,7 +87,7 @@
             this.nextMeetingLabel = ko.observable("{{ next_meeting_label }}");
 
             this.currentTimeLabel = ko.computed(function() {
-                return self.currentTime().format('dddd, Do MMM YYYY, hh:mm a');
+                return self.currentTime().format('HH:mm');
             }, this);
 
             this.currentEventEndTimeLabel = ko.computed(function() {
@@ -133,6 +138,14 @@
         }, 1000);
 
         var clock;
+
+        if (vm.displayCountdown()) {
+            clock = new FlipClock($('.your-clock'), vm.currentEventRemainingSeconds(), {
+                // ... your options here
+                countdown: true,
+                showSeconds: false
+            });
+        }
 
         vm.displayCountdown.subscribe(function(newDisplayCountdown) {
             if (newDisplayCountdown) {
