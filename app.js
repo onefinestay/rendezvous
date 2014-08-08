@@ -63,7 +63,6 @@ function Event(data) {
 
 Event.prototype.is_active = function() {
     var now = moment.utc();
-    console.log('now', now);
     return this.start.isBefore(now) && this.end.isAfter(now);
 }
 
@@ -158,7 +157,6 @@ function calculate_schedule(schedule, anchor) {
 
     for (var i=0; i<schedule.length; i++) {
         var ev = schedule[i];
-        console.log("calc sched", ev.start.toISOString(), anchor.toISOString())
         ev.from_start = ev.start.diff(anchor, 'minutes');
         new_schedule.push(ev)
     }
@@ -178,7 +176,7 @@ app.get('/room/:name/', function(req, res) {
     gcal(accessToken).events.list(room.cal_id, {maxResults: 50}, function(err, data) {
         if(err) return res.send(500,err);
 
-        var now = moment.utc()
+        var now = moment.utc().local()
         var room_data = schedule_for_room(data);
         var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
 
