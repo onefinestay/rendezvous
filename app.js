@@ -187,7 +187,22 @@ app.get('/room/:name/', function(req, res) {
 
         var now = moment.utc().tz(GMT);
         var room_data = schedule_for_room(data);
-        var start_time = now.minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
+        var start_time = moment(now).minutes(0).seconds(0).millisecond(0).subtract(1, 'hours');
+
+        var offset = moment.duration(15 - (now.minutes() % 15), 'minutes');
+        var adhoc_defaults = [15, 30, 60];
+        var adhoc_times = [];
+
+        for (var i=0;i<adhoc_defaults.length;i++) {
+            var len = adhoc_defaults[i];
+            var meeting_finish = moment(now).add(offset, 'minutes')
+                                            .add(moment.duration(len, 'minutes'))
+                                            .seconds(0).millisecond(0);
+
+            if (room_data.next_event && meeting_finish.isBefore(room_data.next_event.start)) {
+                adhoc_times.push(meeting_finish);
+            }
+        }
 
         return res.send(render_template('templates/busyroom.html', {
             room: room,
@@ -195,8 +210,40 @@ app.get('/room/:name/', function(req, res) {
             start_time: start_time,
             current_event: room_data.current_event,
             next_event: room_data.next_event,
-            schedule: calculate_schedule(room_data.schedule, start_time)
+            schedule: calculate_schedule(room_data.schedule, start_time),
+            adhoc_times: adhoc_times
         }));
+    });
+});
+
+
+app.get('/room/:name/book/:end', function(req, res) {
+    if(!req.session.access_token) return res.redirect('/auth');
+
+    //Create an instance from accessToken
+    var accessToken     = req.session.access_token;
+    var calendarId      = rooms[req.params.name].cal_id;
+    var now             = moment.utc().tz(GMT).toISOString();
+    var end             = req.params.end
+
+    var event = {
+        'summary': 'Ad-hoc meeting',
+        'start'  : {'dateTime': now},
+        'end'    : {'dateTime': end},
+        'attendees': [
+            {
+                'email': calendarId // the user from the URL
+            },
+            {
+                'email': req.session.gmail_address  // the logged in user
+            }
+        ]
+    };
+
+    gcal(accessToken).events.insert(calendarId, event, function(err, result) {
+        console.log(err);
+        console.log(result);
+        return res.redirect('/room/' + req.params.name + '/');
     });
 });
 

@@ -34,18 +34,20 @@
 <div id"main" class="row">
 
     <div id="detail" class="fourteen columns alpha">
+        {% if current_event %}
         <div class="title">
             {{current_event.title}}
         </div>
         <div class="attendees">
-            <!-- span class="owner">{{current_event.owner}}</span -->
             {% if current_event.attendees %}
                {{current_event.attendees|join(" ")}}
             {% endif %}
         </div>
-        <!--div class="description">
-            {{current_event.description}}
-        </div-->
+        {% else %}
+            {% for time in adhoc_times %}
+                <a class="book-button three columns" href="/room/{{room.name}}/book/{{time.toISOString()}}">Book until {{time.format('hh:mm')}}</a>
+            {% endfor %}
+        {% endif %}
     </div>
 
     <div id="free-rooms" class="two columns omega">
